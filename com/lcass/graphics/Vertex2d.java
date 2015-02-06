@@ -49,13 +49,24 @@ public class Vertex2d {//2d for texture and for vert coords
 	public void mult(Vertex2d ad){
 		
 	}
-	public void mult(float a){
+	public Vertex2d mult(float a){
 		this.x *= a;
 		this.y *= a;
 		this.u *= a;
 		this.v *= a;
+		return this;
 	}
 	public void div(Vertex2d ad){
 		
+	}
+	public Vertex2d div(float a){
+		this.x /= a;
+		this.y /= a;
+		this.u /= a;
+		this.v /= a;
+		return this;
+	}
+	public Vertex2d xy(){
+		return new Vertex2d(x,y);
 	}
 }

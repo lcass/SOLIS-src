@@ -104,4 +104,7 @@ public abstract class Tile {
 	public boolean supports_sub(){
 		return false;
 	}
+	public void damage(){
+		
+	}
 }

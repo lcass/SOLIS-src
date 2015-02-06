@@ -47,36 +47,44 @@ public class shiphandler {
 		return null;
 	}
 
-	public void move_core(boolean leftr,boolean rightr,boolean left, boolean right, boolean up, boolean down) {
+	public void move_core(boolean leftr, boolean rightr, boolean left,
+			boolean right, boolean up, boolean down) {
 		if (coreship != null) {
-			coreship.move(leftr,rightr,left, right, up, down);
+			coreship.move(leftr, rightr, left, right, up, down);
 		}
 	}
-	public boolean check_collision(Ship a,Ship b){
-		if(Math.abs(a.absolute_position.x - b.absolute_position.x) < 2000 && Math.abs(a.absolute_position.y - b.absolute_position.y) < 2000){
+
+	public boolean check_collision(Ship a, Ship b) {
+		if (Math.abs(a.absolute_position.x - b.absolute_position.x) < 2000
+				&& Math.abs(a.absolute_position.y - b.absolute_position.y) < 2000) {
 			return true;
 		}
 		return false;
 	}
-	public void check_ship_collision(Ship a){
-		for(int i = 0;i < world_ships.length;i++){
-			if(a != world_ships[i]){
-				if(check_collision(a,world_ships[i])){
+
+	public void check_ship_collision(Ship a) {
+		if (a == null) {
+			return;
+		}
+		for (int i = 0; i < world_ships.length; i++) {
+
+			if (a != world_ships[i] && world_ships[i] != null) {
+				if (check_collision(a, world_ships[i])) {
 					a.collide(world_ships[i]);
 					world_ships[i].collide(a);
 				}
+
 			}
 		}
-		if(coreship != null){
-			if(a != coreship){
-				if(check_collision(a , coreship)){
+		if (coreship != null) {
+			if (a != coreship) {
+				if (check_collision(a, coreship)) {
 					coreship.collide(a);
 					a.collide(coreship);
 				}
 			}
 		}
 	}
-	
 
 	public void tick() {
 		if (coreship != null) {
@@ -87,17 +95,16 @@ public class shiphandler {
 		for (int i = 0; i < world_ships.length; i++) {
 			if (world_ships[i] != null) {
 				if (coreship != null) {
-					world_ships[i].bind_camera(
-							new Vertex2d(
-									-(coreship.absolute_position.x - campos.x),
-									-(coreship.absolute_position.y - campos.y)));
-					
+					world_ships[i].bind_camera(new Vertex2d(
+							-(coreship.absolute_position.x - campos.x),
+							-(coreship.absolute_position.y - campos.y)));
+
 				}
 				world_ships[i].tick();
 				check_ship_collision(world_ships[i]);
 			}
 		}
-		
+
 	}
 
 	public void render() {
@@ -156,7 +163,7 @@ public class shiphandler {
 
 						if (id != 0) {
 							tile_updated = true;
-							ships_tiles[i].set_ship((curr_ship - start_curr) );
+							ships_tiles[i].set_ship((curr_ship - start_curr));
 							weight += 1;
 							infect(i, width, id, ((curr_ship - start_curr)) - 1);
 						}
@@ -189,12 +196,14 @@ public class shiphandler {
 			}
 		}
 		;
-		for (int i = start_curr; i < curr_ship; i++) {//ONLY ADD THE BIGGEST SHIP!
+		for (int i = start_curr; i < curr_ship; i++) {// ONLY ADD THE BIGGEST
+														// SHIP!
 			if (i + 1 == highest_weight) {
-				
+
 				Object[] temp = tiles_list.get((i) - start_curr).toArray();
 				Tile[] data = com.lcass.util.Util.cast_tile(temp);
-				coreship = new Ship(64, 64, core, new world(core, 64, 64, data),this);
+				coreship = new Ship(64, 64, core,
+						new world(core, 64, 64, data), this);
 				break;
 			}
 		}

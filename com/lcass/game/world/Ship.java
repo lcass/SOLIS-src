@@ -24,7 +24,8 @@ public class Ship {
 			last_down = false;
 	private Vertex2d forwardstep, upstep, backstep, downstep;
 	private VBO position_string;
-	private Tile[] map,edges;
+	public Tile[] map, edges;
+	public Vertex2d[] collision;
 	private shiphandler sh;
 	private float compound_rotation = 0;
 	private TextGenerator textgen;
@@ -49,7 +50,7 @@ public class Ship {
 			backthrust;// for thrust x and y is the position and u is the
 						// force//position.u is rotation
 
-	public Ship(int width, int height, Core core, world w,shiphandler sh) {
+	public Ship(int width, int height, Core core, world w, shiphandler sh) {
 		this.core = core;
 		this.width = width;
 		this.height = height;
@@ -79,8 +80,11 @@ public class Ship {
 
 	}
 
-	public void damage(int x, int y, int damage) {
-
+	public void damage(Vertex2d position, int damage) {
+		int coordinate = (int) (position.x + (ship.mapwidth * position.y));
+		if (map[coordinate] != null) {
+			map[coordinate].damage();
+		}
 	}
 
 	public void calculate_steps() {
@@ -301,26 +305,29 @@ public class Ship {
 	}
 
 	Vertex2d rotated = new Vertex2d(0, 0, 0, 0);
-private float gyro_force = 0;
-	public void calculate_gyro(){
+	private float gyro_force = 0;
+
+	public void calculate_gyro() {
 		gyro_force = 0;
-		for(Tile t: map){
-			if(t != null){
-				if(t.get_name() == "gyro"){
-					
-					gyro_force += (com.lcass.core.DEFINES.DEFAULT_GYRO_POWER/mass)/10;
-					
+		for (Tile t : map) {
+			if (t != null) {
+				if (t.get_name() == "gyro") {
+
+					gyro_force += (com.lcass.core.DEFINES.DEFAULT_GYRO_POWER / mass) / 10;
+
 				}
 			}
 		}
 	}
-	public void move(boolean leftr,boolean rightr,boolean left, boolean right, boolean up, boolean down) {
-		handle_particles(right,left,up,down);
-		if(leftr){
+
+	public void move(boolean leftr, boolean rightr, boolean left,
+			boolean right, boolean up, boolean down) {
+		handle_particles(right, left, up, down);
+		if (leftr) {
 			rotation_offset -= gyro_force;
 			System.out.println(rotation_offset);
 		}
-		if(rightr){
+		if (rightr) {
 			rotation_offset += gyro_force;
 		}
 		if (right != last_right) {
@@ -341,7 +348,8 @@ private float gyro_force = 0;
 			effects_generated = false;
 		}
 		if (right) {
-			rotated = com.lcass.util.Util.rotate(COM, ForeCOM, compound_rotation);
+			rotated = com.lcass.util.Util.rotate(COM, ForeCOM,
+					compound_rotation);
 			velocity_horiz += forwardstep.x
 					* (Math.abs(rotated.x - ForeCOM.x) / 60)
 					* Math.cos(compound_rotation);// current velocity
@@ -361,14 +369,16 @@ private float gyro_force = 0;
 		}
 
 		if (left) {
-			rotated = com.lcass.util.Util.rotate(COM, BackCOM, compound_rotation);
+			rotated = com.lcass.util.Util.rotate(COM, BackCOM,
+					compound_rotation);
 			velocity_horiz += backstep.x
 					* (-Math.abs(rotated.x - BackCOM.x) / 60)
 					* Math.cos(compound_rotation);// current velocity
 			velocity_vert += backstep.x
 					* ((Math.abs(rotated.y - BackCOM.y) / 60))
-					* Math.sin(compound_rotation);// its not x and y they are just the
-											// positions in the vector
+					* Math.sin(compound_rotation);// its not x and y they are
+													// just the
+			// positions in the vector
 			Vertex2d temp = core.G.central_product(COM, backthrust);//
 			position.u += backthrust.u * backstep.x * temp.y * temp.x;// multiply
 																		// by
@@ -395,7 +405,8 @@ private float gyro_force = 0;
 
 		}
 		if (down) {
-			rotated = com.lcass.util.Util.rotate(COM, DownCOM, compound_rotation);
+			rotated = com.lcass.util.Util.rotate(COM, DownCOM,
+					compound_rotation);
 			velocity_horiz += downstep.x
 					* (-Math.abs(rotated.x - DownCOM.x) / 60)
 					* Math.sin(compound_rotation);// current velocity
@@ -445,12 +456,12 @@ private float gyro_force = 0;
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
 								((int) temp_tile.get_pos().y * 32)),
 						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((COM.y * 32) - camera.y * 2)),
+						-compound_rotation);
 				particle_thrust_right[i] = particles.create_spawn(new Vertex2d(
 						(rotated.x - core.width / 2), rotated.y - core.height
-								/ 2),
-						core.particle_sprite.getcoords(0, 0, 0, 0), 200, 1000,
-						2, 50, 50, 80, 0, 1);
+								/ 2), core.particle_sprite
+						.getcoords(0, 0, 0, 0), 200, 1000, 2, 50, 50, 80, 0, 1);
 				particles.set_creating(false, particle_thrust_right[i]);
 			}
 			for (int i = 0; i < id_left.length; i++) {
@@ -459,12 +470,12 @@ private float gyro_force = 0;
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
 								((int) temp_tile.get_pos().y * 32)),
 						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((COM.y * 32) - camera.y * 2)),
+						-compound_rotation);
 				particle_thrust_left[i] = particles.create_spawn(new Vertex2d(
 						(rotated.x - core.width / 2), rotated.y - core.height
-								/ 2),
-						core.particle_sprite.getcoords(0, 0, 0, 0), 200, 1000,
-						2, 5, 50, -80, 0, 1);
+								/ 2), core.particle_sprite
+						.getcoords(0, 0, 0, 0), 200, 1000, 2, 5, 50, -80, 0, 1);
 				particles.set_creating(false, particle_thrust_left[i]);
 			}
 			for (int i = 0; i < id_up.length; i++) {
@@ -473,12 +484,12 @@ private float gyro_force = 0;
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
 								((int) temp_tile.get_pos().y * 32)),
 						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((COM.y * 32) - camera.y * 2)),
+						-compound_rotation);
 				particle_thrust_up[i] = particles.create_spawn(new Vertex2d(
 						(rotated.x - core.width / 2), rotated.y - core.height
-								/ 2),
-						core.particle_sprite.getcoords(0, 0, 0, 0), 200, 1000,
-						2, 5, 50, 0, 80, 1);
+								/ 2), core.particle_sprite
+						.getcoords(0, 0, 0, 0), 200, 1000, 2, 5, 50, 0, 80, 1);
 				particles.set_creating(false, particle_thrust_up[i]);
 			}
 			for (int i = 0; i < id_down.length; i++) {
@@ -487,12 +498,12 @@ private float gyro_force = 0;
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
 								((int) temp_tile.get_pos().y * 32)),
 						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((COM.y * 32) - camera.y * 2)),
+						-compound_rotation);
 				particle_thrust_down[i] = particles.create_spawn(new Vertex2d(
 						(rotated.x - core.width / 2), rotated.y - core.height
-								/ 2),
-						core.particle_sprite.getcoords(0, 0, 0, 0), 200, 1000,
-						2, 5, 50, 0, -80, 1);
+								/ 2), core.particle_sprite
+						.getcoords(0, 0, 0, 0), 200, 1000, 2, 5, 50, 0, -80, 1);
 				particles.set_creating(false, particle_thrust_down[i]);
 			}
 		}
@@ -603,7 +614,7 @@ private float gyro_force = 0;
 	}
 
 	public void render() {
-		
+
 		ship.render();
 		position_string.render();
 		effects.render();
@@ -621,16 +632,16 @@ private float gyro_force = 0;
 		velocity_vert = 0;
 		velocity_horiz = 0;
 		rotation = 0;
-		rotation_offset =0 ;
+		rotation_offset = 0;
 	}
-	
+
 	private boolean regenerate_particles = true;
 
 	public void handle_particles(boolean right, boolean left, boolean up,
 			boolean down) {
 		float cos = (float) Math.cos(compound_rotation);
 		float sin = (float) Math.sin(compound_rotation);
-		if(regenerate_particles){
+		if (regenerate_particles) {
 			particles.reset_spawn_data();
 		}
 		if (right) {
@@ -638,8 +649,7 @@ private float gyro_force = 0;
 				Tile temp_tile = map[id_right[i]];
 				Vertex2d rotated = com.lcass.util.Util.rotate(
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
-								((int) temp_tile.get_pos().y * 32)),
-						new Vertex2d((((COM.x) * 32)), ((COM.y * 32))),
+								((int) temp_tile.get_pos().y * 32)), rotpoint,
 						-compound_rotation);
 				particles.set_spawn(new Vertex2d((rotated.x - core.width / 2),
 						rotated.y - core.height / 2), particle_thrust_right[i]);
@@ -652,9 +662,8 @@ private float gyro_force = 0;
 				Tile temp_tile = map[id_left[i]];
 				Vertex2d rotated = com.lcass.util.Util.rotate(
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
-								((int) temp_tile.get_pos().y * 32)),
-						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((int) temp_tile.get_pos().y * 32)), rotpoint,
+						-compound_rotation);
 				particles.set_spawn(new Vertex2d((rotated.x - core.width / 2),
 						rotated.y - core.height / 2), particle_thrust_left[i]);
 				particles.set_offset(new Vertex2d((-80) * cos, 80 * sin),
@@ -666,9 +675,8 @@ private float gyro_force = 0;
 				Tile temp_tile = map[id_up[i]];
 				Vertex2d rotated = com.lcass.util.Util.rotate(
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
-								((int) temp_tile.get_pos().y * 32)),
-						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((int) temp_tile.get_pos().y * 32)), rotpoint,
+						-compound_rotation);
 				particles.set_spawn(new Vertex2d((rotated.x - core.width / 2),
 						rotated.y - core.height / 2), particle_thrust_up[i]);
 				particles.set_offset(new Vertex2d(80 * sin, 80 * cos),
@@ -680,68 +688,69 @@ private float gyro_force = 0;
 				Tile temp_tile = map[id_down[i]];
 				Vertex2d rotated = com.lcass.util.Util.rotate(
 						new Vertex2d((((int) temp_tile.get_pos().x) * 32),
-								((int) temp_tile.get_pos().y * 32)),
-						new Vertex2d((((COM.x) * 32) - camera.x * 2),
-								((COM.y * 32) - camera.y * 2)), -compound_rotation);
+								((int) temp_tile.get_pos().y * 32)), rotpoint,
+						-compound_rotation);
 				particles.set_spawn(new Vertex2d((rotated.x - core.width / 2),
 						rotated.y - core.height / 2), particle_thrust_down[i]);
 				particles.set_offset(new Vertex2d(80 * sin, (-80) * cos),
 						particle_thrust_down[i]);
 			}
 		}
-		if((right || left || up || down) && regenerate_particles){
+		if ((right || left || up || down) && regenerate_particles) {
 			regenerate_particles = false;
 		}
-		if(!(right || left || up || down) && !regenerate_particles){
-			
+		if (!(right || left || up || down) && !regenerate_particles) {
+
 			regenerate_particles = true;
 		}
 
 	}
 
-	public void tick() {
+	private Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
 
-		
-		if(!position_manual){
+	public void tick() {
+		rotpoint = new Vertex2d(((COM.x * 32) - camera.x * 2) - 16,
+				((COM.y * 32) - camera.y * 2) - 16);
+		if (!position_manual) {
 			particles.tick();
-		particles.translate(new Vertex2d(camera.x, camera.y));
+			particles.translate(new Vertex2d(camera.x, camera.y));
 		}
 		position_string.edit_data(textgen.generate_text("Position "
 				+ absolute_position.x * 32 + " " + absolute_position.y * 32,
 				new Vertex2d(0, 0), 12));
 		absolute_position.x += position.x;
 		absolute_position.y += position.y;
-		if(!position_manual){
+		if (!position_manual) {
 			effects.transform(camera);
 		}
 		effects.rotate(compound_rotation);
-		
-		ship.rotate(compound_rotation);
-		ship.set_rot_pos(new Vertex2d(((COM.x * 32) - camera.x * 2) - 16,
-				((COM.y * 32) - camera.y * 2) - 16));
 
-		effects.set_rot_pos(new Vertex2d((((COM.x) * 32) - camera.x * 2) - 16,
-				((COM.y * 32) - camera.y * 2) - 16));
+		ship.rotate(compound_rotation);
+		ship.set_rot_pos(rotpoint);
+
+		effects.set_rot_pos(rotpoint);
 
 		rotation += -(position.u);
 		compound_rotation = rotation + rotation_offset;
-		
+
 		if (is_ai) {
 
 			// do ai stuff like swim and buy shoes
 		}
-		if(!position_manual){
+		if (!position_manual) {
 			ship.update_camera(camera);
 			ship.tick();
 			effects.tick();
 		}
-		
-		
+
 	}
+
 	private boolean position_manual = false;
-	public void update_pos(){
+
+	public void update_pos() {
 		position_manual = true;
-		Vertex2d campos = new Vertex2d(-camera.x + absolute_position.x,-camera.y + absolute_position.y);
+		Vertex2d campos = new Vertex2d(-camera.x + absolute_position.x,
+				-camera.y + absolute_position.y);
 		particles.translate(campos);
 		effects.transform(campos);
 		particles.tick();
@@ -749,62 +758,65 @@ private float gyro_force = 0;
 		ship.tick();
 		effects.tick();
 	}
-	public void generate_edges(){
-		
+
+	public void generate_edges() {
+
 		ArrayList<Tile> t = new ArrayList<Tile>();
-		for(int i = 0; i < map.length;i++){
-			if(map[i] != null){
-				if(check_edge(i)){
+		for (int i = 0; i < map.length; i++) {
+			if (map[i] != null) {
+				if (check_edge(i)) {
 					t.add(map[i]);
 				}
 			}
 		}
 		edges = com.lcass.util.Util.cast_tile(t.toArray());
+		collision = new Vertex2d[edges.length];
+		for (int i = 0; i < edges.length; i++) {
+			if (edges[i] != null) {
+				Vertex2d corner = edges[i].position;
+				corner.mult(32);
+				corner.add(absolute_position);
+				collision[i] = new Vertex2d(corner.x, corner.y, corner.x + 32,
+						corner.y + 32);
+			}
+		}
 	}
-	
-	
-	public boolean check_edge(int pos){
+
+	public boolean check_edge(int pos) {
 		int up = pos - ship.mapwidth;
 		int down = pos + ship.mapwidth;
 		int left = pos - 1;
 		int right = pos + 1;
-		if(up >= 0){
-			if(map[up] == null){
+		if (up >= 0) {
+			if (map[up] == null) {
 				return true;
 			}
-		}
-		else{
+		} else {
 			return true;
 		}
-		if(down < ship.get_map().length){
-			if(map[down] == null){
+		if (down < ship.get_map().length) {
+			if (map[down] == null) {
 				return true;
 			}
-		}
-		else{
+		} else {
 			return true;
 		}
-		if(left >= 0){
-			if(map[left] == null){
+		if (left >= 0) {
+			if (map[left] == null) {
 				return true;
 			}
-		}
-		else{
+		} else {
 			return true;
 		}
-		if(right < ship.get_map().length){
-			if(map[right] == null){
+		if (right < ship.get_map().length) {
+			if (map[right] == null) {
 				return true;
 			}
-		}
-		else{
+		} else {
 			return true;
 		}
 		return false;
-		
-		
-		
-		
+
 	}
 
 	public void bind_camera(Vertex2d position) {
@@ -820,9 +832,9 @@ private float gyro_force = 0;
 	}
 
 	public void calculate_masscentre() {
-		
+
 		if (ship != null) {
-			
+
 			Tile[] temp_map = ship.get_map();
 			float xsum = 0;
 			mass = 0;
@@ -834,12 +846,11 @@ private float gyro_force = 0;
 					Vertex2d temp_pos = temp_map[i].get_pos();
 					float temp_mass = temp_map[i].get_mass();
 					total += temp_mass;
-					
-						xsum += temp_pos.x * temp_mass;
-						ysum += temp_pos.y * temp_mass;
-						this.mass += temp_mass;
 
-					
+					xsum += temp_pos.x * temp_mass;
+					ysum += temp_pos.y * temp_mass;
+					this.mass += temp_mass;
+
 				}
 			}
 			if (total > 0) {
@@ -850,10 +861,9 @@ private float gyro_force = 0;
 																			// with
 																			// -1
 
-				
 			} else {
 				COM = new Vertex2d(0, 0, 0, 0);
-				
+
 			}
 			ForeCOM = new Vertex2d(COM.x - 1, COM.y);
 			BackCOM = new Vertex2d(COM.x + 1, COM.y);
@@ -878,7 +888,8 @@ private float gyro_force = 0;
 	public int get_array_position() {
 		return array_position;
 	}
-	public void set_world(world w){
+
+	public void set_world(world w) {
 		ship.set_world(w);
 	}
 
@@ -894,10 +905,28 @@ private float gyro_force = 0;
 	public void toggle_ai() {
 		is_ai = !is_ai;
 	}
-	public void cleanup(){
+
+	public void cleanup() {
 		ship.cleanup();
 	}
-	public void collide(Ship attacking){
-		
+
+	public void collide(Ship attacking) {
+		for(int i = 0;i < collision.length;i++){
+			Vertex2d colliding = collision[i];
+			for(int j = 0;j < attacking.collision.length;j++){
+				Vertex2d attack = attacking.collision[j];
+				attack = com.lcass.util.Util.rotate(attack, rotpoint, rotation);//revert it so that we are dealing with intersecting points that intersect with out rectangle not our points intersecting with their points
+				//commie bastards!
+				if((attack.x < colliding.u && attack.x > colliding.x) || (attack.u < colliding.u && attack.u > colliding.x)){
+	
+					if((attack.y < colliding.v && attack.y > colliding.y) || (attack.v < colliding.v && attack.v > colliding.y)){
+						float mass_ratio = attacking.mass / mass;
+						position.add((attacking.position.sub(position)).mult(mass_ratio));
+						damage(colliding.xy(),0);
+					}
+					
+				}
+			}
+		}
 	}
 }
