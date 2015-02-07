@@ -325,7 +325,6 @@ public class Ship {
 		handle_particles(right, left, up, down);
 		if (leftr) {
 			rotation_offset -= gyro_force;
-			System.out.println(rotation_offset);
 		}
 		if (rightr) {
 			rotation_offset += gyro_force;

@@ -1,10 +1,12 @@
 package com.lcass.game.tiles;
 
+import java.io.Serializable;
+
 import com.lcass.core.Core;
 import com.lcass.game.world.world;
 import com.lcass.graphics.Vertex2d;
 
-public abstract class Tile {
+public abstract class Tile implements Serializable{
 	public Vertex2d position,spritepos;
 	private Core core;
 	private world world;
