@@ -3,14 +3,16 @@ package com.lcass.game.tiles;
 import java.io.Serializable;
 
 import com.lcass.core.Core;
+import com.lcass.game.world.Ship;
 import com.lcass.game.world.world;
 import com.lcass.graphics.Vertex2d;
 
 public abstract class Tile implements Serializable{
 	public Vertex2d position,spritepos;
-	private Core core;
-	private world world;
-	private Sub_Tile sub_tile;
+	protected Core core;
+	protected world world;
+	protected Sub_Tile sub_tile;
+
 	public String name = "empty";
 	private int mass = 0;
 	private int index =0;
@@ -106,7 +108,8 @@ public abstract class Tile implements Serializable{
 	public boolean supports_sub(){
 		return false;
 	}
-	public void damage(){
-		
+	
+	public boolean damage(int damage){
+		return false;
 	}
 }

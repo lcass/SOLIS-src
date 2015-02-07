@@ -181,6 +181,13 @@ public class graphics {
 			render_methods.get(i).call();
 		}
 	}
+	public Vertex2d revert_coordinates(Vertex2d coordinates){
+		Vertex2d temp = new Vertex2d(coordinates.x * width, coordinates.y * height);
+		temp.x = (temp.x )/2;
+		temp.y = (temp.y)/2;
+		return temp;
+		
+	}
 
 	public int bind_vbo(VBO data) {
 		Display_information.add(data);

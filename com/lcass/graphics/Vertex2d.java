@@ -32,6 +32,13 @@ public class Vertex2d {//2d for texture and for vert coords
 		this.u = u;
 		this.v = v;
 	}
+	public Vertex2d add2(Vertex2d ad){
+		this.x += ad.x;
+		this.y += ad.y;
+		this.u += ad.x;
+		this.v += ad.y;
+		return this;
+	}
 	public Vertex2d add(Vertex2d ad){
 		this.x += ad.x;
 		this.y += ad.y;
@@ -68,5 +75,8 @@ public class Vertex2d {//2d for texture and for vert coords
 	}
 	public Vertex2d xy(){
 		return new Vertex2d(x,y);
+	}
+	public Vertex2d whole(){
+		return new Vertex2d(x,y,u,v);
 	}
 }

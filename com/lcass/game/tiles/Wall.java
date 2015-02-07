@@ -1,17 +1,18 @@
 package com.lcass.game.tiles;
 
-import java.io.Serializable;
-
 import com.lcass.core.Core;
+import com.lcass.game.world.Ship;
 import com.lcass.game.world.world;
 import com.lcass.graphics.Vertex2d;
 
 public class Wall extends Tile {
 	public Vertex2d position , spritepos;
 	private Core core;
+	
 	private world world;
 	private Sub_Tile sub_tile;
 	private int index;
+
 	public String name = "wall";
 	private int ship = 0;
 	public Wall(){
@@ -108,6 +109,9 @@ public class Wall extends Tile {
 	}
 	public Sub_Tile get_sub(){
 		return this.sub_tile;
+	}
+	public void damage(int damage){
+		return true;
 	}
 
 }

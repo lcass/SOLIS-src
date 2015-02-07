@@ -31,9 +31,10 @@ public class Util {
 		float sin = (float)Math.sin(angle);
 		float nx = target.x - rotation_point.x;
 		float ny = target.y - rotation_point.y;
+		float nu = target.u - rotation_point.x;
+		float nv = target.v - rotation_point.y;
 		
-		
-		return new Vertex2d(((nx * cos) - (ny * sin)) + rotation_point.x,((nx * sin) + (ny * cos))+ rotation_point.y);
+		return new Vertex2d(((nx * cos) - (ny * sin)) + rotation_point.x,((nx * sin) + (ny * cos))+ rotation_point.y,(nu * cos) - (nv * sin),(nu * sin) + (nv *cos));
 	}
 	
 	

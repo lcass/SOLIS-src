@@ -11,6 +11,7 @@ import com.lcass.game.tiles.Sub_Tile;
 import com.lcass.game.tiles.Thruster;
 import com.lcass.game.tiles.Tile;
 import com.lcass.game.tiles.Wall;
+import com.lcass.game.world.Ship;
 import com.lcass.game.world.shiphandler;
 import com.lcass.game.world.world;
 import com.lcass.graphics.GUI;
@@ -146,7 +147,11 @@ public class Game {
 	public void init() {
 
 		ships = new shiphandler(core, 100);
-	
+		world w = new world(core,64,64);
+		w.add_tile(new Wall(new Vertex2d(0,0),core,w));
+		Ship s = new Ship(64,64,core,w,ships);
+		s.set_position(new Vertex2d(0.1f,0.1f));
+		ships.add_ship(s);
 	}
 
 	public void tick() {

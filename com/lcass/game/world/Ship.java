@@ -77,14 +77,19 @@ public class Ship {
 				+ position.x + " " + position.y, new Vertex2d(0, 0), 12));
 		position_string.bind_texture(textgen.gettexture());
 		this.sh = sh;
-
+		generate_edges();
 	}
 
 	public void damage(Vertex2d position, int damage) {
 		int coordinate = (int) (position.x + (ship.mapwidth * position.y));
 		if (map[coordinate] != null) {
-			map[coordinate].damage();
+			System.out.println("generating2");
+			if(map[coordinate].damage(damage)){
+				remove_tile(position);
+				System.out.println("generating");
+			}
 		}
+		generate_edges();
 	}
 
 	public void calculate_steps() {
@@ -300,7 +305,7 @@ public class Ship {
 	}
 
 	public void set_position(Vertex2d pos) {
-		position = pos;
+		absolute_position = pos;
 
 	}
 
@@ -621,7 +626,7 @@ public class Ship {
 
 	}
 
-	private float rotation = 0;
+	public float rotation = 0;
 
 	public void reset_position() {
 
@@ -705,7 +710,7 @@ public class Ship {
 
 	}
 
-	private Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
+	public Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
 
 	public void tick() {
 		rotpoint = new Vertex2d(((COM.x * 32) - camera.x * 2) - 16,
@@ -714,9 +719,6 @@ public class Ship {
 			particles.tick();
 			particles.translate(new Vertex2d(camera.x, camera.y));
 		}
-		position_string.edit_data(textgen.generate_text("Position "
-				+ absolute_position.x * 32 + " " + absolute_position.y * 32,
-				new Vertex2d(0, 0), 12));
 		absolute_position.x += position.x;
 		absolute_position.y += position.y;
 		if (!position_manual) {
@@ -757,29 +759,25 @@ public class Ship {
 		ship.tick();
 		effects.tick();
 	}
-
-	public void generate_edges() {
-
-		ArrayList<Tile> t = new ArrayList<Tile>();
-		for (int i = 0; i < map.length; i++) {
-			if (map[i] != null) {
-				if (check_edge(i)) {
-					t.add(map[i]);
+	public void generate_edges(){
+		ArrayList<Tile> edge = new ArrayList<Tile>();
+		for(int i = 0;i < map.length;i++){
+			if(map[i] != null){
+				if(check_edge(i)){
+					edge.add(map[i]);
 				}
 			}
 		}
-		edges = com.lcass.util.Util.cast_tile(t.toArray());
+		edges = com.lcass.util.Util.cast_tile(edge.toArray());
 		collision = new Vertex2d[edges.length];
-		for (int i = 0; i < edges.length; i++) {
-			if (edges[i] != null) {
-				Vertex2d corner = edges[i].position;
-				corner.mult(32);
-				corner.add(absolute_position);
-				collision[i] = new Vertex2d(corner.x, corner.y, corner.x + 32,
-						corner.y + 32);
-			}
+		for(int i = 0; i< edges.length;i++){
+			Vertex2d temp = edges[i].get_pos().xy();
+			temp.mult(32);
+			collision[i] = new Vertex2d(temp.x,temp.y,temp.x + 32,temp.y + 32);
 		}
 	}
+
+	
 
 	public boolean check_edge(int pos) {
 		int up = pos - ship.mapwidth;
@@ -824,10 +822,13 @@ public class Ship {
 
 	public void add_tile(Tile t) {
 		ship.add_tile(t);
+		generate_edges();
 	}
 
 	public void remove_tile(Vertex2d position) {
 		ship.remove_tile(position);
+		
+		generate_edges();
 	}
 
 	public void calculate_masscentre() {
@@ -876,6 +877,7 @@ public class Ship {
 	public void set_world(Tile[] t) {
 
 		map = t;
+		
 		calculate_masscentre();
 		calculate_COT();
 	}
@@ -909,23 +911,5 @@ public class Ship {
 		ship.cleanup();
 	}
 
-	public void collide(Ship attacking) {
-		for(int i = 0;i < collision.length;i++){
-			Vertex2d colliding = collision[i];
-			for(int j = 0;j < attacking.collision.length;j++){
-				Vertex2d attack = attacking.collision[j];
-				attack = com.lcass.util.Util.rotate(attack, rotpoint, rotation);//revert it so that we are dealing with intersecting points that intersect with out rectangle not our points intersecting with their points
-				//commie bastards!
-				if((attack.x < colliding.u && attack.x > colliding.x) || (attack.u < colliding.u && attack.u > colliding.x)){
 	
-					if((attack.y < colliding.v && attack.y > colliding.y) || (attack.v < colliding.v && attack.v > colliding.y)){
-						float mass_ratio = attacking.mass / mass;
-						position.add((attacking.position.sub(position)).mult(mass_ratio));
-						damage(colliding.xy(),0);
-					}
-					
-				}
-			}
-		}
-	}
 }
