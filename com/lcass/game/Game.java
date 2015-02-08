@@ -149,8 +149,17 @@ public class Game {
 		ships = new shiphandler(core, 100);
 		world w = new world(core,64,64);
 		w.add_tile(new Wall(new Vertex2d(0,0),core,w));
+		w.add_tile(new Wall(new Vertex2d(1,0),core,w));
+		w.add_tile(new Wall(new Vertex2d(2,0),core,w));
+		w.add_tile(new Wall(new Vertex2d(3,0),core,w));
+		w.add_tile(new Wall(new Vertex2d(4,0),core,w));
+		w.add_tile(new Wall(new Vertex2d(1,1),core,w));
+		w.add_tile(new Wall(new Vertex2d(2,1),core,w));
+		w.add_tile(new Wall(new Vertex2d(3,1),core,w));
+		w.add_tile(new Wall(new Vertex2d(4,1),core,w));
+		w.add_tile(new Wall(new Vertex2d(1,2),core,w));
 		Ship s = new Ship(64,64,core,w,ships);
-		s.set_position(new Vertex2d(0.1f,0.1f));
+		s.set_position(new Vertex2d(0,0));
 		ships.add_ship(s);
 	}
 

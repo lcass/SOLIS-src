@@ -120,4 +120,7 @@ public class Thruster extends Tile{
 	public Sub_Tile get_sub(){
 		return this.sub_tile;
 	}
+	public boolean damage(int a){
+		return true;
+	}
 }

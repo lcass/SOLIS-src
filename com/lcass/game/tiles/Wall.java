@@ -110,7 +110,7 @@ public class Wall extends Tile {
 	public Sub_Tile get_sub(){
 		return this.sub_tile;
 	}
-	public void damage(int damage){
+	public boolean damage(int damage){
 		return true;
 	}
 

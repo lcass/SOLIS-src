@@ -78,8 +78,8 @@ public class shiphandler {
 						for(int at = 0;at < attacking.collision.length;at++){
 							Vertex2d attacker = attacking.collision[at].whole();
 							attacker.add2(core.G.revert_coordinates(attacking.absolute_position));
-							System.out.println(attacker.x + " " + corner.x);
-							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, a.rotation);
+							
+							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.rotation);
 							if(((attacker.x > corner.x) && (attacker.x < corner.u))|| ((attacker.u > corner.x) && (attacker.u < corner.u))){
 								if(((attacker.y > corner.y) && (attacker.y < corner.v))|| ((attacker.v > corner.y) && (attacker.v < corner.v))){
 									System.out.println("colliding");
@@ -98,16 +98,19 @@ public class shiphandler {
 					for(int ax =0;ax< a.collision.length;ax++){
 						Vertex2d corner = a.collision[ax].whole();
 						corner.add2(core.G.revert_coordinates(a.absolute_position.xy()));
-					
+						corner.sub(new Vertex2d(32,0,0,0));
 						for(int at = 0;at < attacking.collision.length;at++){
 							Vertex2d attacker = attacking.collision[at].whole();
 							attacker.add2(core.G.revert_coordinates(attacking.absolute_position));
+							attacker = com.lcass.util.Util.rotate(attacker, attacking.rotpoint, attacking.rotation);
+							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.rotation);
 							
-							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, a.rotation);
-							if(((attacker.x > corner.x) && (attacker.x < corner.u))|| ((attacker.u > corner.x) && (attacker.u < corner.u))){
-								if(((attacker.y > corner.y) && (attacker.y < corner.v))|| ((attacker.v > corner.y) && (attacker.v < corner.v))){
+							if(((attacker.x >= corner.x) && (attacker.x <= corner.u))|| ((attacker.u >= corner.x) && (attacker.u <= corner.u))){
+								
+								if(((attacker.y >= corner.y) && (attacker.y <= corner.v))|| ((attacker.v >= corner.y) && (attacker.v <= corner.v))){
 									a.damage(a.collision[ax].div(32), 100);
 									coreship.damage(attacking.collision[at].div(32), 100);
+									
 								}
 							}
 						}

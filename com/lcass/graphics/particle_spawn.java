@@ -104,9 +104,10 @@ public class particle_spawn {
 
 	public void tick() {
 
-		if (!is_alive() && !initial_creating) {
+		if ((!is_alive() && !initial_creating) || particles == null ) {
 			kill();
 			particle.remove(location);// it kills itself.
+			return;
 		}
 		if (creating && vbo_generated) {
 			personal_ticks += 1;

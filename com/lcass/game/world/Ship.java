@@ -82,11 +82,12 @@ public class Ship {
 
 	public void damage(Vertex2d position, int damage) {
 		int coordinate = (int) (position.x + (ship.mapwidth * position.y));
+		
 		if (map[coordinate] != null) {
-			System.out.println("generating2");
+			
 			if(map[coordinate].damage(damage)){
 				remove_tile(position);
-				System.out.println("generating");
+				
 			}
 		}
 		generate_edges();
@@ -449,6 +450,7 @@ public class Ship {
 
 	public void generate_effects(boolean right, boolean left, boolean up,
 			boolean down) {
+
 		Tile[] temp = map;
 		effects.clear();
 		if (!particles_generated) {
@@ -643,6 +645,9 @@ public class Ship {
 
 	public void handle_particles(boolean right, boolean left, boolean up,
 			boolean down) {
+		if(!particles_generated){
+			return;
+		}
 		float cos = (float) Math.cos(compound_rotation);
 		float sin = (float) Math.sin(compound_rotation);
 		if (regenerate_particles) {
@@ -715,7 +720,7 @@ public class Ship {
 	public void tick() {
 		rotpoint = new Vertex2d(((COM.x * 32) - camera.x * 2) - 16,
 				((COM.y * 32) - camera.y * 2) - 16);
-		if (!position_manual) {
+		if (!position_manual && particles_generated) {
 			particles.tick();
 			particles.translate(new Vertex2d(camera.x, camera.y));
 		}
@@ -823,12 +828,24 @@ public class Ship {
 	public void add_tile(Tile t) {
 		ship.add_tile(t);
 		generate_edges();
+		effects_generated = false;
+		particles_generated = false;
+		calculate_COT();
+		calculate_masscentre();
+		calculate_steps();
+		generate_edges();
 	}
 
 	public void remove_tile(Vertex2d position) {
 		ship.remove_tile(position);
-		
+		effects_generated = false;
+		particles_generated = false;
+		calculate_COT();
+		calculate_masscentre();
+		calculate_steps();
 		generate_edges();
+		reset_particles();
+		
 	}
 
 	public void calculate_masscentre() {
@@ -909,6 +926,10 @@ public class Ship {
 
 	public void cleanup() {
 		ship.cleanup();
+	}
+	public void reset_particles(){
+		particles.clear();
+		effects.clear();
 	}
 
 	

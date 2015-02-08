@@ -107,5 +107,8 @@ public class Floor extends Tile{
 	public boolean supports_sub(){
 		return true;
 	}
+	public boolean damage(int a) {
+		return true;
+	}
 
 }
