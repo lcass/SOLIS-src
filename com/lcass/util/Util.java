@@ -34,7 +34,7 @@ public class Util {
 		float nu = target.u - rotation_point.x;
 		float nv = target.v - rotation_point.y;
 		
-		return new Vertex2d(((nx * cos) - (ny * sin)) + rotation_point.x,((nx * sin) + (ny * cos))+ rotation_point.y,(nu * cos) - (nv * sin),(nu * sin) + (nv *cos));
+		return new Vertex2d(((nx * cos) - (ny * sin)) + rotation_point.x,((nx * sin) + (ny * cos))+ rotation_point.y,((nu * cos) - (nv * sin))+rotation_point.x,((nu * sin) + (nv *cos)) + rotation_point.y);
 	}
 	
 	

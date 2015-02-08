@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import com.lcass.core.Core;
 import com.lcass.game.tiles.Tile;
+import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
+import com.lcass.util.Progressive_buffer;
 
 public class shiphandler {
 	public Ship[] world_ships;
@@ -12,12 +14,17 @@ public class shiphandler {
 	public Ship coreship;
 	private Core core;
 	private Vertex2d campos;
+	private VBO v;
 	private int curr_ship = 0;
 
 	public shiphandler(Core core, int max_ship) {
 		this.core = core;
 		world_ships = new Ship[max_ship];
 		positions_player = new int[max_ship];
+		v = new VBO(core.G.mainvbo);
+		v.bind_texture(core.effect_sprite.gettexture());
+		v.create(50 * 12);
+		
 	}
 
 	public void set_core_ship(Ship core) {
@@ -93,6 +100,7 @@ public class shiphandler {
 		}
 		if (coreship != null) {
 			if (a != coreship) {
+				Progressive_buffer[] temp = new Progressive_buffer[]{new Progressive_buffer(null,false),new Progressive_buffer(null,true)};
 				if (check_collision(a, coreship)) {
 					Ship attacking = coreship;
 					for(int ax =0;ax< a.collision.length;ax++){
@@ -101,21 +109,24 @@ public class shiphandler {
 						corner.sub(new Vertex2d(32,0,0,0));
 						for(int at = 0;at < attacking.collision.length;at++){
 							Vertex2d attacker = attacking.collision[at].whole();
+							attacker = com.lcass.util.Util.rotate(attacker, attacking.rotpoint, -attacking.compound_rotation);					
+							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.compound_rotation);
 							attacker.add2(core.G.revert_coordinates(attacking.absolute_position));
-							attacker = com.lcass.util.Util.rotate(attacker, attacking.rotpoint, attacking.rotation);
-							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.rotation);
 							
+							
+						
 							if(((attacker.x >= corner.x) && (attacker.x <= corner.u))|| ((attacker.u >= corner.x) && (attacker.u <= corner.u))){
 								
 								if(((attacker.y >= corner.y) && (attacker.y <= corner.v))|| ((attacker.v >= corner.y) && (attacker.v <= corner.v))){
 									a.damage(a.collision[ax].div(32), 100);
 									coreship.damage(attacking.collision[at].div(32), 100);
-									
+									System.out.println(attacker.x);
 								}
 							}
 						}
 					}
 				}
+				
 			}
 		}
 		start+=1;
@@ -152,6 +163,7 @@ public class shiphandler {
 				world_ships[i].render();
 			}
 		}
+		v.render();
 	}
 
 	public void cleanup_player() {

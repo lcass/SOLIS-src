@@ -27,7 +27,7 @@ public class Ship {
 	public Tile[] map, edges;
 	public Vertex2d[] collision;
 	private shiphandler sh;
-	private float compound_rotation = 0;
+	public float compound_rotation = 0;
 	private TextGenerator textgen;
 	private float rotation_offset = 0;
 	private int array_position = 0;
