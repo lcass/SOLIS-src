@@ -15,7 +15,7 @@ public abstract class Tile implements Serializable{
 
 	public String name = "empty";
 	private int mass = 0;
-	private int index =0;
+	
 	private int ship = 0;
 	private boolean supports_sub = false;
 	public Tile(){
@@ -79,7 +79,7 @@ public abstract class Tile implements Serializable{
 		return this.name;
 	}
 	public int get_index(){
-		return this.index;
+		return 0;
 	}
 	public void set_dir(int dir){
 		

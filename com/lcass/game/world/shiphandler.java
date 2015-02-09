@@ -89,7 +89,8 @@ public class shiphandler {
 							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.rotation);
 							if(((attacker.x > corner.x) && (attacker.x < corner.u))|| ((attacker.u > corner.x) && (attacker.u < corner.u))){
 								if(((attacker.y > corner.y) && (attacker.y < corner.v))|| ((attacker.v > corner.y) && (attacker.v < corner.v))){
-									System.out.println("colliding");
+									a.damage(a.edges[ax].get_pos(), 100);
+									attacking.damage(attacking.edges[at].get_pos(), 100);
 								}
 							}
 						}
@@ -100,7 +101,6 @@ public class shiphandler {
 		}
 		if (coreship != null) {
 			if (a != coreship) {
-				Progressive_buffer[] temp = new Progressive_buffer[]{new Progressive_buffer(null,false),new Progressive_buffer(null,true)};
 				if (check_collision(a, coreship)) {
 					Ship attacking = coreship;
 					for(int ax =0;ax< a.collision.length;ax++){
@@ -111,16 +111,21 @@ public class shiphandler {
 							Vertex2d attacker = attacking.collision[at].whole();
 							attacker = com.lcass.util.Util.rotate(attacker, attacking.rotpoint, -attacking.compound_rotation);					
 							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.compound_rotation);
-							attacker.add2(core.G.revert_coordinates(attacking.absolute_position));
+							attacker.add2(core.G.revert_coordinates(attacking.absolute_position.xy()));
 							
 							
 						
 							if(((attacker.x >= corner.x) && (attacker.x <= corner.u))|| ((attacker.u >= corner.x) && (attacker.u <= corner.u))){
 								
 								if(((attacker.y >= corner.y) && (attacker.y <= corner.v))|| ((attacker.v >= corner.y) && (attacker.v <= corner.v))){
-									a.damage(a.collision[ax].div(32), 100);
-									coreship.damage(attacking.collision[at].div(32), 100);
+									corner.sub2(core.G.revert_coordinates(a.absolute_position.xy()));
+									corner.div(32);
+									attacker.sub2(core.G.revert_coordinates(attacking.absolute_position.xy()));
+									attacker.div(32);
 									System.out.println(attacker.x);
+									a.damage(a.edges[ax].get_pos(), 100);
+									attacking.damage(attacker, 100);
+									
 								}
 							}
 						}

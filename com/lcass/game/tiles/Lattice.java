@@ -81,7 +81,7 @@ public class Lattice extends Tile {
 
 	public void bind_null() {
 
-		world.bind_empty_render(index);
+		//world.bind_empty_render(index);
 
 		if (sub_tile != null) {
 			sub_tile.bind_null();

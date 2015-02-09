@@ -53,6 +53,13 @@ public class Vertex2d {//2d for texture and for vert coords
 		this.v -= ad.v;
 		return this;
 	}
+	public Vertex2d sub2(Vertex2d ad){
+		this.x -= ad.x;
+		this.y -= ad.y;
+		this.u -= ad.x;
+		this.v -= ad.y;
+		return this;
+	}
 	public void mult(Vertex2d ad){
 		
 	}
