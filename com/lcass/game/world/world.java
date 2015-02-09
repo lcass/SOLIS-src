@@ -165,7 +165,7 @@ public class world {
 		if (coordinate < tilemap.length) {
 
 			if (tilemap[coordinate] != null) {
-				System.out.println(tilemap[coordinate].get_name());
+				
 				tilemap[coordinate].bind_null();
 				tilemap[coordinate] = null;
 				if (render_COM) {

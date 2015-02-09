@@ -1,5 +1,5 @@
 package com.lcass.util.saves;
 
-public class SO {
+public class TileSaver {
 
 }
