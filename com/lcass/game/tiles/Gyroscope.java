@@ -12,8 +12,9 @@ public class Gyroscope extends Tile{
 	private int index;
 	public String name = "gyro";
 	private int ship = 0;
+	
 	public Gyroscope(){
-		
+		electric = true;
 	}
 	public Gyroscope(Vertex2d position, Core core,world world) {
 		super(position, core,world);
@@ -21,12 +22,14 @@ public class Gyroscope extends Tile{
 		
 		spritepos = com.lcass.util.Util.tex_coordinate(5, 1);
 		this.core = core;
+		electric = true;
 
 	}
 	public void init(Core core){
 		this.core = core;
 		spritepos = com.lcass.util.Util.tex_coordinate(5, 1);
 		this.position = new Vertex2d(0,0);
+		electric = true;
 	}
 	
 	public Vertex2d getsprite(

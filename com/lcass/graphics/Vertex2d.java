@@ -86,4 +86,16 @@ public class Vertex2d {//2d for texture and for vert coords
 	public Vertex2d whole(){
 		return new Vertex2d(x,y,u,v);
 	}
+	public void set_x(float x){
+		this.x = x;
+	}
+	public void set_y(float y){
+		this.y = y;
+	}
+	public void set_u(float u){
+		this.u = u;
+	}
+	public void set_v(float v){
+		this.v = v;
+	}
 }

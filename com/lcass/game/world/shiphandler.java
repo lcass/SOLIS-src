@@ -116,9 +116,7 @@ public class shiphandler {
 							attacker = com.lcass.util.Util.rotate(attacker, attacking.rotpoint, -attacking.compound_rotation);					
 							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.compound_rotation);
 							attacker.add2(core.G.revert_coordinates(attacking.absolute_position.xy()));
-							
-							
-						
+									
 							if(((attacker.x >= corner.x) && (attacker.x <= corner.u))|| ((attacker.u >= corner.x) && (attacker.u <= corner.u))){
 								
 								if(((attacker.y >= corner.y) && (attacker.y <= corner.v))|| ((attacker.v >= corner.y) && (attacker.v <= corner.v))){
@@ -127,7 +125,7 @@ public class shiphandler {
 									attacker.sub2(core.G.revert_coordinates(attacking.absolute_position.xy()));
 									attacker.div(32);
 									a.damage(a.edges[ax].get_pos(), 100);
-									attacking.damage(attacker, 100);
+									attacking.damage(attacking.edges[at].get_pos(), 100);
 									
 								}
 							}

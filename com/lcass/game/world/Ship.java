@@ -931,6 +931,39 @@ public class Ship {
 		particles.clear();
 		effects.clear();
 	}
+	public Vertex2d cable_pos(int pos){
+		
+		Vertex2d poses = new Vertex2d(-1,-1,-1,-1);
+		if(pos > 0){
+			if(map[pos-1] != null){
+				if(map[pos -1].is_electric()){
+					poses.set_x(pos - 1);
+				}
+			}
+		}
+		if(pos < map.length){
+			if(map[pos+1] != null){
+				if(map[pos + 1].is_electric()){
+					poses.set_y(pos - 1);
+				}
+			}
+		}
+		if(pos > ship.mapwidth){
+			if(map[pos - ship.mapwidth] != null){
+				if(map[pos - ship.mapwidth].is_electric()){
+					poses.set_u(pos - ship.mapwidth);
+				}
+			}
+		}
+		if(pos < map.length - ship.mapwidth){
+			if(map[pos+ship.mapwidth] != null){
+				if(map[pos+ ship.mapwidth].is_electric()){
+					poses.set_v(pos + ship.mapwidth);
+				}
+			}
+		}
+		return poses;
+	}
 
 	
 }

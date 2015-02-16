@@ -12,9 +12,11 @@ public abstract class Tile implements Serializable{
 	protected Core core;
 	protected world world;
 	protected Sub_Tile sub_tile;
-
+	protected boolean supplied = true;
+	protected boolean electric = false;
 	public String name = "empty";
 	private int mass = 0;
+	protected int netnum = 0;
 	
 	private int ship = 0;
 	private boolean supports_sub = false;
@@ -111,5 +113,32 @@ public abstract class Tile implements Serializable{
 	
 	public boolean damage(int damage){
 		return false;
+	}
+	public boolean resources_supplied(){
+		return supplied;
+	}
+	public void set_resources_supplied(boolean supplied){
+		this.supplied = supplied;
+	}
+	public boolean is_electric(){
+		return electric;
+	}
+	public void set_electric(boolean electric){
+		this.electric = electric;
+	}
+	public boolean is_supplier(){
+		return false;
+	}
+	public boolean is_user(){
+		return false;
+	}
+	public boolean is_wire(){
+		return false;
+	}
+	public void set_network(int in){
+		netnum = in;
+	}
+	public int get_network(){
+		return netnum;
 	}
 }

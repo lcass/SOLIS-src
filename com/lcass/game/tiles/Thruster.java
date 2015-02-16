@@ -16,7 +16,7 @@ public class Thruster extends Tile{
 	public String name = "thruster";
 	private int ship = 0;
 	public Thruster(){
-		
+		electric = true;
 	}
 	public Thruster(Vertex2d position, Core core,world world) {
 		super(position, core,world);
@@ -25,12 +25,13 @@ public class Thruster extends Tile{
 		
 		spritepos = Util.tex_coordinate(1, 1);
 		this.core = core;
-
+		electric = true;
 	}
 	public void init(Core core){
 		this.core = core;
 		spritepos = Util.tex_coordinate(1, 1);
 		this.position = new Vertex2d(0,0);
+		electric = true;
 	}
 	public void set_world(world world){
 		this.world = world;
