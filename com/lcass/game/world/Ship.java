@@ -964,6 +964,22 @@ public class Ship {
 		}
 		return poses;
 	}
+	public int[] electronics;
+	public void calculate_electronics(){
+		ArrayList<Integer> checked = new ArrayList<Integer>();
+		for(int i = 0;i < map.length;i++){
+			if(map[i].is_electric()){
+				checked.add(i);
+			}
+		}
+		electronics = new int[checked.size()];
+		for(int i = 0;i < electronics.length;i++){
+			electronics[i] = checked.get(i);
+		}
+	}
+	public void update_network(){
+		
+	}
 
 	
 }

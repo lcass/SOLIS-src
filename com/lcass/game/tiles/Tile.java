@@ -14,9 +14,12 @@ public abstract class Tile implements Serializable{
 	protected Sub_Tile sub_tile;
 	protected boolean supplied = true;
 	protected boolean electric = false;
+	protected boolean active = true;
 	public String name = "empty";
+	protected int power = 0;
 	private int mass = 0;
 	protected int netnum = 0;
+	protected float resistance = 0;
 	
 	private int ship = 0;
 	private boolean supports_sub = false;
@@ -140,5 +143,17 @@ public abstract class Tile implements Serializable{
 	}
 	public int get_network(){
 		return netnum;
+	}
+	public int get_power(){
+		return power;
+	}
+	public float get_resistance(){
+		return resistance;
+	}
+	public void set_active(boolean active){
+		this.active = active;
+	}
+	public boolean get_active(){
+		return active;
 	}
 }
