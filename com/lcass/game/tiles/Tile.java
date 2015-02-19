@@ -156,4 +156,9 @@ public abstract class Tile implements Serializable{
 	public boolean get_active(){
 		return active;
 	}
+	public int get_accepting_types(){
+		return 0;//no accepting
+	}public int get_type(){
+		return 5;
+	}
 }

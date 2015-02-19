@@ -67,5 +67,6 @@ public abstract class Sub_Tile extends Tile{
 	public float get_mass(){
 		return 0;
 	}
+	
 
 }

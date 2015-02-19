@@ -113,5 +113,9 @@ public class Wall extends Tile {
 	public boolean damage(int damage){
 		return true;
 	}
+	public int get_accepting_types(){
+		return 3;
+	}
+	
 
 }

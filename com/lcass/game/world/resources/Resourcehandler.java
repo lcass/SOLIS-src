@@ -73,7 +73,7 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 			
 			if (ship.map[electronics[i]].is_supplier() && ship.map[electronics[i]].get_network() == 0) {
 				ship.map[electronics[i]].set_network(curr_network);
-				networks.add(new network());
+				networks.add(new network(false));
 				int netpos = curr_network - 1;
 				networks.get(netpos).add_source(ship.map[electronics[i]]);
 				Vertex2d coordinatev = ship.map[electronics[i]].get_pos().whole().div(32);

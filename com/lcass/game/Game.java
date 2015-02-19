@@ -300,6 +300,8 @@ public class Game {
 			if (tile_dir > 3) {
 				tile_dir = 0;
 			}
+			inventory.selected.set_dir(tile_dir);
+			inventory.force_update();
 		}
 		if (!docked) {
 			handle_ships();

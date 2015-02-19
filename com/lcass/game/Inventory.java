@@ -75,7 +75,7 @@ public class Inventory {
 					if (storage[i + position] != null) {
 					
 						Vertex2d spritepos = storage[i + position].stored.getsprite();
-						temp = game.core.G
+						temp = game.core.G//just dont mess with these values , they work leave them...
 								.rectangle(game.core.width - 40,
 										game.core.height - 48 - (i * 38),
 										game.world.obwidth,
@@ -336,6 +336,9 @@ public class Inventory {
 	public void option_6(){
 		lastselected = selectedposition;
 		selectedposition = 6;
+	}
+	public void force_update(){
+		dataupdate = true;
 	}
 
 }

@@ -78,6 +78,9 @@ public class Corner extends Sub_Tile{
 	public int get_dir(){
 		return dir;
 	}
+	public int get_type(){
+		return 4;
+	}
 
 
 }

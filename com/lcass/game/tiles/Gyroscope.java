@@ -113,4 +113,8 @@ public class Gyroscope extends Tile{
 	public boolean damage(int a) {
 		return true;
 	}
+	public boolean is_user(){
+		return true;
+	}
+	
 }
