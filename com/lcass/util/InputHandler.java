@@ -15,9 +15,9 @@ import com.lcass.graphics.Vertex2d;
 
 public class InputHandler {
 
-	public boolean sa, sb, sc, sd, se, sf, sg, sh, si, sj, sk, sl, sm, sn, so,
-			sp, sq, sr, ss, st, su, sv, sw, sx, sy, sz, sm1, sm2, sm3,sright,sleft,sup,sdown,sspace, escape;// true
-																				// value
+	public boolean a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
+			u, v, w, x, y, z, mouse1, mouse2, mouse3;
+	// value
 
 	private PointerInfo mouse;
 	private Point mousepos;
@@ -42,62 +42,141 @@ public class InputHandler {
 		mouseposition.x = (int) ((mousepos.getX() - Display.getX()) - 3);
 		mouseposition.y = core.height
 				- (int) ((mousepos.getY() - Display.getY()) - 32);
-		
+
 		while (Mouse.next()) {
 			if (Mouse.getEventButton() != -1) {
-				if(Mouse.getEventButtonState()){
-					if(Mouse.getEventButton() == 0){
-						sm1 = true;
+				if (Mouse.getEventButtonState()) {
+					if (Mouse.getEventButton() == 0) {
+						mouse1 = true;
 					}
-					if(Mouse.getEventButton() == 1){
-						sm2 = true;
+					if (Mouse.getEventButton() == 1) {
+						mouse2 = true;
 					}
-					if(Mouse.getEventButton() == 2){
-						sm3 = true;
+					if (Mouse.getEventButton() == 2) {
+						mouse3 = true;
 					}
-				}
-				else{
-					sm1 = false;
-					sm2 = false;
-					sm3 = false;
+				} else {
+					mouse1 = false;
+					mouse2 = false;
+					mouse3 = false;
 				}
 			}
 		}
-		
-		sleft = Keyboard.isKeyDown(Keyboard.KEY_LEFT);
-		sright = Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
-		sup = Keyboard.isKeyDown(Keyboard.KEY_UP);
-		sdown = Keyboard.isKeyDown(Keyboard.KEY_DOWN);
-		sspace = Keyboard.isKeyDown(Keyboard.KEY_SPACE );
-		sa = Keyboard.isKeyDown(Keyboard.KEY_A);
-		sb = Keyboard.isKeyDown(Keyboard.KEY_B);
-		sc = Keyboard.isKeyDown(Keyboard.KEY_C);
-		sd = Keyboard.isKeyDown(Keyboard.KEY_D);
-		se = Keyboard.isKeyDown(Keyboard.KEY_E);
-		sf = Keyboard.isKeyDown(Keyboard.KEY_F);
-		sg = Keyboard.isKeyDown(Keyboard.KEY_G);
-		sh = Keyboard.isKeyDown(Keyboard.KEY_H);
-		si = Keyboard.isKeyDown(Keyboard.KEY_I);
-		sj = Keyboard.isKeyDown(Keyboard.KEY_J);
-		sk = Keyboard.isKeyDown(Keyboard.KEY_K);
-		sl = Keyboard.isKeyDown(Keyboard.KEY_L);
-		sm = Keyboard.isKeyDown(Keyboard.KEY_M);
-		sn = Keyboard.isKeyDown(Keyboard.KEY_N);
-		so = Keyboard.isKeyDown(Keyboard.KEY_O);
-		sp = Keyboard.isKeyDown(Keyboard.KEY_P);
-		sq = Keyboard.isKeyDown(Keyboard.KEY_Q);
-		sr = Keyboard.isKeyDown(Keyboard.KEY_R);
-		ss = Keyboard.isKeyDown(Keyboard.KEY_S);
-		sy = Keyboard.isKeyDown(Keyboard.KEY_T);
-		su = Keyboard.isKeyDown(Keyboard.KEY_U);
-		sv = Keyboard.isKeyDown(Keyboard.KEY_V);
-		sw = Keyboard.isKeyDown(Keyboard.KEY_W);
-		sx = Keyboard.isKeyDown(Keyboard.KEY_X);
-		sy = Keyboard.isKeyDown(Keyboard.KEY_Y);
-		sz = Keyboard.isKeyDown(Keyboard.KEY_Z);
+		while (Keyboard.next()) {
+			if (Keyboard.getEventKey() != -1) {
+				if (Keyboard.getEventCharacter() == 'a') {
+					a = true;
+				}
+				if (Keyboard.getEventCharacter() == 'b') {
+					b = true;
+				}
+				if (Keyboard.getEventCharacter() == 'c') {
+					c = true;
+				}
+				if (Keyboard.getEventCharacter() == 'd') {
+					d = true;
 
-		escape = Keyboard.isKeyDown(Keyboard.KEY_ESCAPE);
+					if (Keyboard.getEventCharacter() == 'e') {
+						e = true;
+					}
+					if (Keyboard.getEventCharacter() == 'f') {
+						f = true;
+					}
+					if (Keyboard.getEventCharacter() == 'g') {
+						g = true;
+					}
+					if (Keyboard.getEventCharacter() == 'h') {
+						h = true;
+					}
+					if (Keyboard.getEventCharacter() == 'i') {
+						i = true;
+					}
+					if (Keyboard.getEventCharacter() == 'j') {
+						j = true;
+					}
+					if (Keyboard.getEventCharacter() == 'k') {
+						k = true;
+					}
+					if (Keyboard.getEventCharacter() == 'l') {
+						l = true;
+					}
+					if (Keyboard.getEventCharacter() == 'm') {
+						m = true;
+					}
+
+					if (Keyboard.getEventCharacter() == 'n') {
+						n = true;
+					}
+					if (Keyboard.getEventCharacter() == 'o') {
+						o = true;
+					}
+					if (Keyboard.getEventCharacter() == 'p') {
+						p = true;
+					}
+					if (Keyboard.getEventCharacter() == 'q') {
+						q = true;
+					}
+					if (Keyboard.getEventCharacter() == 'r') {
+						r = true;
+					}
+					if (Keyboard.getEventCharacter() == 's') {
+						s = true;
+					}
+					if (Keyboard.getEventCharacter() == 't') {
+						t = true;
+					}
+					if (Keyboard.getEventCharacter() == 'u') {
+						u = true;
+					}
+					if (Keyboard.getEventCharacter() == 'v') {
+						v = true;
+					}
+					if (Keyboard.getEventCharacter() == 'w') {
+						w = true;
+					}
+					if (Keyboard.getEventCharacter() == 'x') {
+						x = true;
+					}
+					if (Keyboard.getEventCharacter() == 'y') {
+						y = true;
+					}
+					if (Keyboard.getEventCharacter() == 'z') {
+						z = true;
+					}
+					else{
+						a = false;
+						b = false;
+						c = false;
+						d = false;
+						e = false;
+						f = false;
+						g = false;
+						h = false;
+						i = false;
+						j = false;
+						k = false;
+						l = false;
+						m = false;
+						n = false;
+						o = false;
+						p = false;
+						q = false;
+						r = false;
+						s = false;
+						t = false;
+						u = false;
+						v = false;
+						w = false;
+						x = false;
+						y = false;
+						z = false;
+						
+					}
+				}
+
+			}
+
+		}
 
 	}
-
 }
