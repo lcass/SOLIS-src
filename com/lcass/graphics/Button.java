@@ -34,7 +34,7 @@ public class Button{
 	}
 	public void tick(){
 
-		input = gui.ih.sm1;
+		input = gui.ih.mouse1;
 		
 		if(input){
 			if(check){

@@ -16,7 +16,7 @@ import com.lcass.graphics.Vertex2d;
 public class InputHandler {
 
 	public boolean a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t,
-			u, v, w, x, y, z, mouse1, mouse2, mouse3;
+			u, v, w, x, y, z, left, right, up, down, mouse1, mouse2, mouse3;
 	// value
 
 	private PointerInfo mouse;
@@ -143,7 +143,18 @@ public class InputHandler {
 					if (Keyboard.getEventCharacter() == 'z') {
 						z = true;
 					}
-					else{
+					if (Keyboard.getEventKey() == Keyboard.KEY_LEFT) {
+						left = true;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_RIGHT) {
+						right = true;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_UP) {
+						up = true;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_DOWN) {
+						down = true;
+					} else {
 						a = false;
 						b = false;
 						c = false;
@@ -170,7 +181,11 @@ public class InputHandler {
 						x = false;
 						y = false;
 						z = false;
-						
+						left = false;
+						up = false;
+						down = false;
+						right = false;
+
 					}
 				}
 

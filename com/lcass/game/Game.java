@@ -164,29 +164,29 @@ public class Game {
 	}
 
 	public void tick() {
-		if (!core.ih.sa && !core.ih.ss && !core.ih.sd && !core.ih.sw) {
+		if (!core.ih.a && !core.ih.s && !core.ih.d && !core.ih.w) {
 			timeheld = 0;
 
 		} else if (timeheld < max) {
 			timeheld += 0.1f;
 		}
 
-		if (core.ih.sa) {
+		if (core.ih.a) {
 			if (camera.x < 4 * 32 * zoom) {
 				camera.x += step + (step * timeheld);
 			}
 		}
-		if (core.ih.ss) {
+		if (core.ih.s) {
 			if (camera.y < 4 * 32 * zoom) {
 				camera.y += step + (step * timeheld);
 			}
 		}
-		if (core.ih.sd) {
+		if (core.ih.d) {
 			if (camera.x > 0 - (world.mapwidth * 32) + (core.width - (4 * 32))) {
 				camera.x -= step + (step * timeheld);
 			}
 		}
-		if (core.ih.sw) {
+		if (core.ih.w) {
 			if (camera.y > 0 - (world.mapheight * 32)
 					+ (core.height - (4 * 32))) {
 				camera.y -= step + (step * timeheld);
@@ -196,7 +196,7 @@ public class Game {
 		// placing handling
 		if (!on_gui(core.ih.obtain_mouse()) && docked) {
 
-			if (core.ih.sm1) {
+			if (core.ih.mouse1) {
 
 				Vertex2d mousepos = core.ih.obtain_mouse();
 				Vertex2d actual = new Vertex2d(
