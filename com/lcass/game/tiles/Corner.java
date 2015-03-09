@@ -13,16 +13,19 @@ public class Corner extends Sub_Tile{
 	public Vertex2d sprite_pos;
 	public Corner(){
 		sprite_pos = com.lcass.util.Util.tex_coordinate(2,1);
+		type = 2;
 	}
 	public Corner(Tile super_tile, Core core) {
 		super(super_tile, core);
 		sprite_pos = com.lcass.util.Util.tex_coordinate(2, 1);
+		type = 2;
+		this.super_tile = super_tile;
 	}
 	public void tick(){
 		
 	}
 	public void bind(){
-		
+		System.out.println(super_tile);
 		index = super_tile.get_world().bind_render(super_tile.get_pos(), sprite_pos);
 	}
 	public void bind_index(){
@@ -78,9 +81,6 @@ public class Corner extends Sub_Tile{
 	public int get_dir(){
 		return dir;
 	}
-	public int get_type(){
-		return 4;
-	}
-
+	
 
 }

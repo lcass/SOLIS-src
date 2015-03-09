@@ -15,21 +15,25 @@ public class Wall extends Tile {
 
 	public String name = "wall";
 	private int ship = 0;
+	
 	public Wall(){
 		
 	}
 	public Wall(Vertex2d position, Core core,world world) {
 		super(position, core,world);
 		this.position = position;
-		
+		type = 5;
 		spritepos = new Vertex2d(16,0,32,16);
 		this.core = core;
+		accepting = new int[]{3};
 
 	}
 	public void init(Core core){
 		this.core = core;
+		type = 5;
 		spritepos = new Vertex2d(16,0,32,16);
 		this.position = new Vertex2d(0,0);
+		accepting = new int[]{3};
 	}
 	
 	public Vertex2d getsprite(
@@ -113,9 +117,7 @@ public class Wall extends Tile {
 	public boolean damage(int damage){
 		return true;
 	}
-	public int get_accepting_types(){
-		return 3;
-	}
+
 	
 
 }

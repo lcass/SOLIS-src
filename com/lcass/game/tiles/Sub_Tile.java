@@ -5,11 +5,11 @@ import com.lcass.graphics.Vertex2d;
 
 public abstract class Sub_Tile extends Tile{
 	private String name = "void_sub";
-	
+	protected Sub_Tile sub;
 	//private Vertex2d sprite_pos = new Vertex2d(0,0,0,0);
 	private Tile super_tile = null;
 	public Vertex2d sprite_pos;
-	
+ 
 	
 	private Core core;
 	public Sub_Tile(){
@@ -66,6 +66,19 @@ public abstract class Sub_Tile extends Tile{
 	}
 	public float get_mass(){
 		return 0;
+	}
+	public void attach_sub(Sub_Tile sub){
+		this.sub = sub;
+		this.sub.bind();
+	}
+	public Sub_Tile get_sub(){
+		return this.sub;
+	}
+	public void private_update(){
+		
+	}
+	public void sub_update(){
+		
 	}
 	
 

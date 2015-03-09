@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.lcass.core.Core;
 import com.lcass.game.tiles.Tile;
+import com.lcass.game.world.resources.Resourcehandler;
 import com.lcass.graphics.Effect_builder;
 import com.lcass.graphics.Particles;
 import com.lcass.graphics.TextGenerator;
@@ -35,6 +36,7 @@ public class Ship {
 	private Effect_builder effects;
 	private boolean particles_generated = false;
 	private Particles particles;
+	private Resourcehandler resources;
 	public Vertex2d absolute_position, position, BackCOM, ForeCOM, UpCOM,
 			DownCOM, COM, camera, forwardthrust, upthrust, downthrust,// position
 																		// is a
@@ -78,6 +80,7 @@ public class Ship {
 		position_string.bind_texture(textgen.gettexture());
 		this.sh = sh;
 		generate_edges();
+		resources = new Resourcehandler(this);
 	}
 
 	public void damage(Vertex2d position, int damage) {
@@ -718,6 +721,10 @@ public class Ship {
 	public Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
 
 	public void tick() {
+		resources.tick();
+		if(ship.hasdata){
+			update_network();
+		}
 		rotpoint = new Vertex2d(((COM.x * 32) - camera.x * 2) - 16,
 				((COM.y * 32) - camera.y * 2) - 16);
 		if (!position_manual && particles_generated) {
@@ -915,6 +922,7 @@ public class Ship {
 		calculate_masscentre();
 		calculate_COT();
 		calculate_steps();
+		update_network();
 		particles_generated = false;
 		effects_generated = false;
 
@@ -934,6 +942,7 @@ public class Ship {
 	public Vertex2d cable_pos(int pos){
 		
 		Vertex2d poses = new Vertex2d(-1,-1,-1,-1);
+		
 		if(pos > 0){
 			if(map[pos-1] != null){
 				if(map[pos -1].is_electric()){
@@ -944,7 +953,7 @@ public class Ship {
 		if(pos < map.length){
 			if(map[pos+1] != null){
 				if(map[pos + 1].is_electric()){
-					poses.set_y(pos - 1);
+					poses.set_y(pos + 1);
 				}
 			}
 		}
@@ -968,8 +977,14 @@ public class Ship {
 	public void calculate_electronics(){
 		ArrayList<Integer> checked = new ArrayList<Integer>();
 		for(int i = 0;i < map.length;i++){
+		
+			if(map[i] != null){
+				
 			if(map[i].is_electric()){
+				
 				checked.add(i);
+				
+			}
 			}
 		}
 		electronics = new int[checked.size()];
@@ -978,6 +993,8 @@ public class Ship {
 		}
 	}
 	public void update_network(){
+		calculate_electronics();
+		resources.calculate_resources();
 		
 	}
 

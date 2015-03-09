@@ -19,7 +19,10 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 	}
 
 	public void tick() {
-
+		
+		for (network n : networks) {
+			n.tick();
+		}
 	}
 
 	public void calculate_resources() {
@@ -37,30 +40,34 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 		generate_power();
 
 	}
-	public void check_electricity(int pos ,int curr_network){
+
+	public void check_electricity(int pos, int curr_network) {
 		Vertex2d positions = ship.cable_pos(pos);
+	
 		if (positions.x != -1) {
 			if (ship.map[(int) positions.x].get_network() != curr_network) {
 				ship.map[(int) positions.x].set_network(curr_network);
-				check_electricity((int)positions.x,curr_network);
+				check_electricity((int) positions.x, curr_network);
+				
 			}
 		}
 		if (positions.y != -1) {
+			
 			if (ship.map[(int) positions.y].get_network() != curr_network) {
 				ship.map[(int) positions.y].set_network(curr_network);
-				check_electricity((int)positions.y,curr_network);
+				check_electricity((int) positions.y, curr_network);
 			}
 		}
 		if (positions.u != -1) {
 			if (ship.map[(int) positions.u].get_network() != curr_network) {
 				ship.map[(int) positions.u].set_network(curr_network);
-				check_electricity((int)positions.u,curr_network);
+				check_electricity((int) positions.u, curr_network);
 			}
 		}
 		if (positions.v != -1) {
 			if (ship.map[(int) positions.v].get_network() != curr_network) {
 				ship.map[(int) positions.v].set_network(curr_network);
-				check_electricity((int)positions.v,curr_network);
+				check_electricity((int) positions.v, curr_network);
 			}
 		}
 	}
@@ -69,32 +76,50 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 		ship.calculate_electronics();
 		int[] electronics = ship.electronics;
 		int curr_network = 1;
-		for (int i = 0; i <electronics.length; i++) {
-			
-			if (ship.map[electronics[i]].is_supplier() && ship.map[electronics[i]].get_network() == 0) {
+		for(int i = 0;i < electronics.length;i++){
+			if(ship.map[electronics[i]] != null){
+				ship.map[electronics[i]].set_network(0);
+			}
+		}
+		for (int i = 0; i < electronics.length; i++) {
+
+			if (ship.map[electronics[i]].is_supplier()
+					&& ship.map[electronics[i]].get_network() == 0) {
 				ship.map[electronics[i]].set_network(curr_network);
 				networks.add(new network(false));
+
 				int netpos = curr_network - 1;
-				networks.get(netpos).add_source(ship.map[electronics[i]]);
-				Vertex2d coordinatev = ship.map[electronics[i]].get_pos().whole().div(32);
+				Vertex2d coordinatev = ship.map[electronics[i]].get_pos()
+						.whole();
+				
 				int coordinate = (int) (coordinatev.x + (coordinatev.y * ship.ship.mapwidth));
-				check_electricity(coordinate,curr_network);
+				
+				check_electricity(coordinate, curr_network);
 			}
 		}
-		for(int i = 0; i< ship.electronics.length;i++){
+		for (int i = 0; i < ship.electronics.length; i++) {
 			int pos = electronics[i];
-			if(ship.map[i].is_supplier()){
-				networks.get(ship.map[pos].get_network()-1).add_source(ship.map[i]);
-			}
-			if(ship.map[i].is_wire()){
-				networks.get(ship.map[pos].get_network()-1).add_wire(ship.map[i]);
-			}
-			if(ship.map[i].is_sub()){
-				networks.get(ship.map[pos].get_network()-1).add_consumer(ship.map[i]);
+			
+			if (ship.map[pos].get_network() != 0) {
+				
+				if (ship.map[pos].is_supplier()) {
+					System.out.println("testing");
+					networks.get(ship.map[pos].get_network() - 1).add_source(
+							ship.map[pos]);
+				
+				}
+				if (ship.map[pos].is_wire()) {
+					networks.get(ship.map[pos].get_network() - 1).add_wire(
+							ship.map[pos]);
+					
+				}
+				if (ship.map[pos].is_sub()) {
+					networks.get(ship.map[pos].get_network() - 1).add_consumer(
+							ship.map[pos]);
+				}
 			}
 		}
-		
-			
+
 	}
 
 }

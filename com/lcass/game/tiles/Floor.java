@@ -8,7 +8,6 @@ public class Floor extends Tile {
 	public Vertex2d position, spritepos;
 	private Core core;
 	private world world;
-	private Sub_Tile sub_tile;
 	private int index;
 	public String name = "floor";
 	private int ship = 0;
@@ -23,6 +22,7 @@ public class Floor extends Tile {
 
 		spritepos = com.lcass.util.Util.tex_coordinate(2, 0);
 		this.core = core;
+		accepting = new int[]{2,3};
 
 	}
 
@@ -30,6 +30,7 @@ public class Floor extends Tile {
 		this.core = core;
 		spritepos = com.lcass.util.Util.tex_coordinate(2, 0);
 		this.position = new Vertex2d(0, 0);
+		accepting = new int[]{2,3};
 	}
 
 	public Vertex2d getsprite() {
@@ -116,9 +117,7 @@ public class Floor extends Tile {
 	}
 
 	public void set_sub(Sub_Tile t) {
-		if (t.get_type() < get_accepting_types()) {
-			this.sub_tile = t;
-		}
+		this.sub_tile = t;
 	}
 
 	public Sub_Tile get_sub() {
@@ -132,9 +131,9 @@ public class Floor extends Tile {
 	public boolean damage(int a) {
 		return true;
 	}
+	
+	
 
-	public int get_accepting_types() {
-		return 5;
-	}
+	
 
 }

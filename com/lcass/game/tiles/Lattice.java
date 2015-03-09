@@ -22,12 +22,14 @@ public class Lattice extends Tile {
 		this.position = position;
 		spritepos = com.lcass.util.Util.tex_coordinate(3, 1);
 		this.core = core;
+		accepting = new int[]{2};
 	}
 
 	public void init(Core core) {
 		this.core = core;
 		spritepos = com.lcass.util.Util.tex_coordinate(3, 1);
 		this.position = new Vertex2d(0, 0);
+		accepting = new int[]{2};
 	}
 
 	public Vertex2d getsprite() {

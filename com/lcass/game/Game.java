@@ -3,10 +3,13 @@ package com.lcass.game;
 import java.lang.reflect.Method;
 
 import com.lcass.core.Core;
+import com.lcass.game.tiles.Cable;
+import com.lcass.game.tiles.Cable_holder;
 import com.lcass.game.tiles.Corner;
 import com.lcass.game.tiles.Floor;
 import com.lcass.game.tiles.Gyroscope;
 import com.lcass.game.tiles.Lattice;
+import com.lcass.game.tiles.Solar;
 import com.lcass.game.tiles.Sub_Tile;
 import com.lcass.game.tiles.Thruster;
 import com.lcass.game.tiles.Tile;
@@ -139,27 +142,31 @@ public class Game {
 		inventory.add_item(new Wall(new Vertex2d(0, 0), core, world), 1000);
 		inventory.add_item(new Thruster(new Vertex2d(0, 0), core, world), 1000);
 		inventory.add_item(new Corner(null, core), 500);
-		inventory.add_item(new Lattice(new Vertex2d(0,0),core,world),1000);
-		inventory.add_item(new Floor(new Vertex2d(0,0), core,world),1000);
-		inventory.add_item(new Gyroscope(new Vertex2d(0,0),core,world), 1000);
+		inventory.add_item(new Lattice(new Vertex2d(0, 0), core, world), 1000);
+		inventory.add_item(new Floor(new Vertex2d(0, 0), core, world), 1000);
+		inventory
+				.add_item(new Gyroscope(new Vertex2d(0, 0), core, world), 1000);
+		inventory.add_item(new Cable_holder(null, core), 500);
+		inventory.add_item(new Cable(null, core), 500);
+		inventory.add_item(new Solar(new Vertex2d(0,0),core,world), 1000);
 	}
 
 	public void init() {
 
 		ships = new shiphandler(core, 100);
-		world w = new world(core,64,64);
-		w.add_tile(new Wall(new Vertex2d(0,0),core,w));
-		w.add_tile(new Wall(new Vertex2d(1,0),core,w));
-		w.add_tile(new Wall(new Vertex2d(2,0),core,w));
-		w.add_tile(new Wall(new Vertex2d(3,0),core,w));
-		w.add_tile(new Wall(new Vertex2d(4,0),core,w));
-		w.add_tile(new Wall(new Vertex2d(1,1),core,w));
-		w.add_tile(new Wall(new Vertex2d(2,1),core,w));
-		w.add_tile(new Wall(new Vertex2d(3,1),core,w));
-		w.add_tile(new Wall(new Vertex2d(4,1),core,w));
-		w.add_tile(new Wall(new Vertex2d(1,2),core,w));
-		Ship s = new Ship(64,64,core,w,ships);
-		s.set_position(new Vertex2d(0,0));
+		world w = new world(core, 64, 64);
+		w.add_tile(new Wall(new Vertex2d(0, 0), core, w));
+		w.add_tile(new Wall(new Vertex2d(1, 0), core, w));
+		w.add_tile(new Wall(new Vertex2d(2, 0), core, w));
+		w.add_tile(new Wall(new Vertex2d(3, 0), core, w));
+		w.add_tile(new Wall(new Vertex2d(4, 0), core, w));
+		w.add_tile(new Wall(new Vertex2d(1, 1), core, w));
+		w.add_tile(new Wall(new Vertex2d(2, 1), core, w));
+		w.add_tile(new Wall(new Vertex2d(3, 1), core, w));
+		w.add_tile(new Wall(new Vertex2d(4, 1), core, w));
+		w.add_tile(new Wall(new Vertex2d(1, 2), core, w));
+		Ship s = new Ship(64, 64, core, w, ships);
+		s.set_position(new Vertex2d(0, 0));
 		ships.add_ship(s);
 	}
 
@@ -240,17 +247,27 @@ public class Game {
 								}
 							}
 						} else if (world.get_tile(actual) != null) {
-							if (world.get_tile(actual).get_sub() == null) {
+							
 								if (inventory.take_selected(1)) {
 
 									Sub_Tile temp = world
 											.getnew((Sub_Tile) inventory.selected);
-
-									temp.init(core);
-									temp.set_super(world.get_tile(actual));
-									temp.set_dir(tile_dir);
-									world.set_sub(temp, actual);
-								}
+									if (world.get_tile(actual).get_sub() == null) {
+										temp.init(core);
+										temp.set_super(world.get_tile(actual));
+										temp.set_dir(tile_dir);
+										if(!world.set_sub(temp, actual)){
+											inventory.add_item(inventory.selected, 1);
+										}
+									} else {
+										temp.init(core);
+										temp.set_super(world.get_tile(actual));
+										temp.set_dir(tile_dir);
+										if(!world.set_sub_sub(temp, actual)){
+											inventory.add_item(inventory.selected, 1);
+										}
+									}
+								
 							}
 
 						}
@@ -352,26 +369,26 @@ public class Game {
 	}
 
 	public void handle_ships() {
-		boolean left = false, right = false, up = false, down = false,leftr = false,rightr = false;
-		if (core.ih.sleft) {
+		boolean left = false, right = false, up = false, down = false, leftr = false, rightr = false;
+		if (core.ih.left) {
 			left = true;
 		}
-		if (core.ih.sright) {
+		if (core.ih.right) {
 			right = true;
 		}
-		if (core.ih.sup) {
+		if (core.ih.up) {
 			up = true;
 		}
-		if (core.ih.sdown) {
+		if (core.ih.down) {
 			down = true;
 		}
-		if(core.ih.sq){
+		if (core.ih.q) {
 			leftr = true;
 		}
-		if(core.ih.se){
+		if (core.ih.e) {
 			rightr = true;
 		}
-		ships.move_core(leftr,rightr,left, right, up, down);
+		ships.move_core(leftr, rightr, left, right, up, down);
 
 	}
 }

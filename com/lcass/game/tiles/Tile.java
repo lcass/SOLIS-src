@@ -14,13 +14,17 @@ public abstract class Tile implements Serializable{
 	protected Sub_Tile sub_tile;
 	protected boolean supplied = true;
 	protected boolean electric = false;
+	protected boolean cable = false;
+	protected boolean supplier = false;
+	protected boolean consumer = false;
 	protected boolean active = true;
 	public String name = "empty";
+	protected int[] accepting = new int[0];
 	protected int power = 0;
 	private int mass = 0;
 	protected int netnum = 0;
 	protected float resistance = 0;
-	
+	protected int type = 0;
 	private int ship = 0;
 	private boolean supports_sub = false;
 	public Tile(){
@@ -123,42 +127,96 @@ public abstract class Tile implements Serializable{
 	public void set_resources_supplied(boolean supplied){
 		this.supplied = supplied;
 	}
-	public boolean is_electric(){
-		return electric;
+	public void private_update(){
+		if(sub_tile != null){
+			this.sub_tile.sub_update();
+		}
 	}
-	public void set_electric(boolean electric){
-		this.electric = electric;
+	
+	public boolean is_electric(){
+		this.private_update();
+		
+		if(this.sub_tile == null){
+			return electric|cable|supplier|consumer;
+		}
+		else{
+			
+			return this.electric|this.cable|this.supplier|this.consumer|this.sub_tile.is_electric();
+		}
 	}
 	public boolean is_supplier(){
-		return false;
+		this.private_update();
+		if(sub_tile == null){
+			return supplier;
+		}
+		else{
+			return supplier|sub_tile.is_supplier();
+		}
 	}
 	public boolean is_user(){
-		return false;
+		
+		this.private_update();
+		if(sub_tile == null){
+			return consumer;
+		}
+		else{
+			return consumer|sub_tile.is_user();
+		}
 	}
 	public boolean is_wire(){
-		return false;
+		this.private_update();
+		
+		if(sub_tile == null){
+			return supplier|cable|electric;
+		}
+		else{
+			return supplier|cable|electric|this.sub_tile.is_wire();
+		}
 	}
 	public void set_network(int in){
+		this.private_update();
 		netnum = in;
 	}
 	public int get_network(){
 		return netnum;
 	}
 	public int get_power(){
+		this.private_update();
 		return power;
 	}
 	public float get_resistance(){
-		return resistance;
+		this.private_update();
+		float temp = this.resistance;
+		
+		if(this.sub_tile != null){
+			
+			temp += this.sub_tile.get_resistance();
+		}
+		return temp;
 	}
 	public void set_active(boolean active){
+		this.private_update();
 		this.active = active;
 	}
 	public boolean get_active(){
 		return active;
 	}
-	public int get_accepting_types(){
-		return 0;//no accepting
+	public int[] get_accepting_types(){
+		 return accepting;
 	}public int get_type(){
-		return 5;
+		return type;
 	}
+	public boolean support_type(int type){
+		for(int i = 0; i < accepting.length;i++){
+			if(accepting[i] == type){
+				return true;
+			}
+		}
+		return false;
+	}
+	public void bind_sub(){
+		this.private_update();
+		this.sub_tile.sub.bind();
+	}
+	
 }

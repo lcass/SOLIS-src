@@ -26,7 +26,7 @@ public class world {
 	private Tile[] tilemap;
 	private VBO drawdata;
 
-	private boolean hasdata = false;
+	public boolean hasdata = false;
 	private Core core;
 
 	public world(Core core, int width, int height) {
@@ -65,7 +65,6 @@ public class world {
 
 	public void render() {
 
-		
 		drawdata.render();
 		if (render_COM) {
 			vCOM.render();
@@ -144,19 +143,62 @@ public class world {
 		return null;
 	}
 
-	public void set_sub(Sub_Tile sub, Vertex2d position) {
+	public boolean set_sub(Sub_Tile sub, Vertex2d position) {
 		int coordinate = (int) (position.x + (position.y * mapwidth));
 		if (coordinate < tilemap.length) {
-			sub.bind();
-			tilemap[coordinate].set_sub(sub);
-			if (render_COM) {
-				update_COM();
+			if (tilemap[coordinate] != null) {
+				if (tilemap[coordinate].support_type(sub.get_type())) {
+					
+					sub.bind();
+					tilemap[coordinate].set_sub(sub);
+					if (render_COM) {
+						update_COM();
+					}
+					hasdata = true;
+					return true;
+				}
 			}
 		} else {
 			System.out.println("Error , position is outside the map bounds");
-			return;
+			return false;
 		}
-		hasdata = true;
+
+		return false;
+
+	}
+
+	public boolean set_sub_sub(Sub_Tile sub, Vertex2d position) {
+		int coordinate = (int) (position.x + (position.y * mapwidth));
+		if (coordinate < tilemap.length) {
+			if (tilemap[coordinate] != null) {
+				if (tilemap[coordinate].get_sub() != null) {
+					
+					if(tilemap[coordinate].get_sub().get_sub() != null){
+						
+						return false;
+						
+					}
+					if (tilemap[coordinate].get_sub().support_type(
+							sub.get_type())) {
+						
+						tilemap[coordinate].get_sub().attach_sub(sub);
+						
+						if (render_COM) {
+							update_COM();
+						}
+						hasdata = true;
+						return true;
+					} 
+
+				}
+			}
+		}
+		else {
+			System.out
+					.println("Error , position is outside the map bounds");
+			return false;
+		}
+		return false;
 	}
 
 	public void remove_tile(Vertex2d position) {
@@ -165,7 +207,7 @@ public class world {
 		if (coordinate < tilemap.length) {
 
 			if (tilemap[coordinate] != null) {
-				
+
 				tilemap[coordinate].bind_null();
 				tilemap[coordinate] = null;
 				if (render_COM) {
@@ -251,12 +293,22 @@ public class world {
 	public void update_COM() {
 		calculate_masscentre();
 		calculate_COT();
-		vCOM.set_position(core.G.convert_coordinates(new Vertex2d((COM.x * 32)-32,( COM.y * 32)-16)).add(camera));
-		vCOTr.set_position(core.G.convert_coordinates(new Vertex2d((forwardthrust.x * 32)-32,
-				(forwardthrust.y * 32)-16)).add(camera));
-		vCOTl.set_position(core.G.convert_coordinates(new Vertex2d((backthrust.x * 32)-32, (backthrust.y * 32)-16)).add(camera));
-		vCOTu.set_position(core.G.convert_coordinates(new Vertex2d((upthrust.x * 32)-32, (upthrust.y * 32)-16)).add(camera));
-		vCOTd.set_position(core.G.convert_coordinates(new Vertex2d((downthrust.x * 32)-32, (downthrust.y * 32)-16)).add(camera));
+		vCOM.set_position(core.G.convert_coordinates(
+				new Vertex2d((COM.x * 32) - 32, (COM.y * 32) - 16)).add(camera));
+		vCOTr.set_position(core.G.convert_coordinates(
+				new Vertex2d((forwardthrust.x * 32) - 32,
+						(forwardthrust.y * 32) - 16)).add(camera));
+		vCOTl.set_position(core.G
+				.convert_coordinates(
+						new Vertex2d((backthrust.x * 32) - 32,
+								(backthrust.y * 32) - 16)).add(camera));
+		vCOTu.set_position(core.G.convert_coordinates(
+				new Vertex2d((upthrust.x * 32) - 32, (upthrust.y * 32) - 16))
+				.add(camera));
+		vCOTd.set_position(core.G
+				.convert_coordinates(
+						new Vertex2d((downthrust.x * 32) - 32,
+								(downthrust.y * 32) - 16)).add(camera));
 	}
 
 	public void calculate_COT() {
@@ -421,14 +473,23 @@ public class world {
 	public void tick() {
 
 		drawdata.set_position(camera);
-		if(render_COM){
-			if(COM != null){
-			vCOM.set_position(core.G.convert_coordinates(new Vertex2d((COM.x * 32)-32,( COM.y * 32)-16)).add(camera));
-			vCOTr.set_position(core.G.convert_coordinates(new Vertex2d((forwardthrust.x * 32)-32,
-					(forwardthrust.y * 32)-16)).add(camera));
-			vCOTl.set_position(core.G.convert_coordinates(new Vertex2d((backthrust.x * 32)-32, (backthrust.y * 32)-16)).add(camera));
-			vCOTu.set_position(core.G.convert_coordinates(new Vertex2d((upthrust.x * 32)-32, (upthrust.y * 32)-16)).add(camera));
-			vCOTd.set_position(core.G.convert_coordinates(new Vertex2d((downthrust.x * 32)-32, (downthrust.y * 32)-16)).add(camera));
+		if (render_COM) {
+			if (COM != null) {
+				vCOM.set_position(core.G.convert_coordinates(
+						new Vertex2d((COM.x * 32) - 32, (COM.y * 32) - 16))
+						.add(camera));
+				vCOTr.set_position(core.G.convert_coordinates(
+						new Vertex2d((forwardthrust.x * 32) - 32,
+								(forwardthrust.y * 32) - 16)).add(camera));
+				vCOTl.set_position(core.G.convert_coordinates(
+						new Vertex2d((backthrust.x * 32) - 32,
+								(backthrust.y * 32) - 16)).add(camera));
+				vCOTu.set_position(core.G.convert_coordinates(
+						new Vertex2d((upthrust.x * 32) - 32,
+								(upthrust.y * 32) - 16)).add(camera));
+				vCOTd.set_position(core.G.convert_coordinates(
+						new Vertex2d((downthrust.x * 32) - 32,
+								(downthrust.y * 32) - 16)).add(camera));
 			}
 		}
 		if (reset) {
@@ -455,6 +516,7 @@ public class world {
 		if (hasdata) {
 
 			drawdata.edit_data(renderdata);
+			
 			hasdata = false;
 		}
 	}
