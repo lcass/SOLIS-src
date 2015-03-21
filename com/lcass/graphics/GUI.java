@@ -15,16 +15,22 @@ public class GUI {
 	protected graphics graph;
 	private VBO coredata;
 	public VBO backdata;
+	private VBO textdata;
 	private Progressive_buffer[] current_data = new Progressive_buffer[2];
+	private Progressive_buffer[] text_data = new Progressive_buffer[2];
 	private Core core;
 	private Vertex2d position;
+	private TextGenerator tg;
 	private boolean hasdata = false, updated = false;
+	
 	private ArrayList<Button> buttons = new ArrayList<Button>();
 
-	public GUI(Progressive_buffer[] backdata, Texture t, Core core) {
+	public GUI(Vertex2d position,Progressive_buffer[] backdata, Texture t, Core core) {
 		this.core = core;
 		current_data[0] = new Progressive_buffer(null, false);
 		current_data[1] = new Progressive_buffer(null, true);
+		text_data[0] = new Progressive_buffer(null,false);
+		text_data[1] = new Progressive_buffer(null,true);
 		this.graph = core.G;
 		this.backdata = new VBO(core.G.mainvbo);
 		this.ih = core.ih;
@@ -35,7 +41,12 @@ public class GUI {
 		this.coredata = new VBO(core.G.mainvbo);
 		this.coredata.create(12 * 500);
 		this.coredata.bind_texture(button_sheet.gettexture());
-
+		textdata = new VBO(core.G.mainvbo);
+		textdata.create(12 * 5000);
+		
+		tg = new TextGenerator(core);
+		textdata.bind_texture(tg.gettexture());
+		this.position = position;
 	}
 
 	protected void bind(Progressive_buffer[] data) {
@@ -70,6 +81,7 @@ public class GUI {
 		if (hasdata) {
 			coredata.render();
 		}
+		textdata.render();
 	}
 
 	public void bind_button(Vertex2d position, boolean textured,
@@ -88,5 +100,25 @@ public class GUI {
 
 	public void update() {
 		updated = true;
+	}
+	public void modify_text(int index,Vertex2d position, String text, int fontsize){
+		Progressive_buffer[] texttemp = tg.generate_text(text,this.position.whole().add(position), fontsize);
+		
+		text_data[0].index_put(index, texttemp[0]);
+		text_data[1].index_put(index,texttemp[1]);
+		textdata.edit_data(text_data);
+	}
+	public int draw_text(Vertex2d position , String text , int fontsize){
+		Progressive_buffer[] texttemp = tg.generate_text(text,this.position.whole().add(position), fontsize);
+		int stored = text_data[0].get_limit();
+		text_data[0].extend(texttemp[0]);
+		text_data[1].extend(texttemp[1]);
+		textdata.edit_data(text_data);
+		return stored;
+	}
+	public void set_instance(Object a){
+		for(int i = 0;i < buttons.size();i++){
+			buttons.get(i).set_instance(a);
+		}
 	}
 }

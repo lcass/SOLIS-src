@@ -27,12 +27,16 @@ public class Thruster extends Tile{
 		spritepos = Util.tex_coordinate(1, 1);
 		this.core = core;
 		electric = true;
+		consumer = true;
+		power = 10;
 	}
 	public void init(Core core){
 		this.core = core;
 		spritepos = Util.tex_coordinate(1, 1);
 		this.position = new Vertex2d(0,0);
 		electric = true;
+		consumer = true;
+		power = 10;
 	}
 	public void set_world(world world){
 		this.world = world;

@@ -86,6 +86,7 @@ public class world {
 			tilemap[coordinate] = t;
 			tilemap[coordinate].set_world(this);
 			tilemap[coordinate].bind();
+			tilemap[coordinate].set_array_pos(coordinate);
 			if (render_COM) {
 				update_COM();
 			}
@@ -106,6 +107,7 @@ public class world {
 			t.set_index(index);
 			tilemap[coordinate] = t;
 			tilemap[coordinate].bind_index();
+			tilemap[coordinate].set_array_pos(coordinate);
 			if (render_COM) {
 				update_COM();
 			}
@@ -564,6 +566,12 @@ public class world {
 
 				add_tile(tiles[i]);
 			}
+		}
+	}
+	public void set_data(Tile[] t){
+		tilemap = new Tile[64 * 64];
+		for(int i = 0;i < t.length;i++){
+			tilemap[i] = t[i];
 		}
 	}
 }

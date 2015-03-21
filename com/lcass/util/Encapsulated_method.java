@@ -69,4 +69,7 @@ public class Encapsulated_method {
 		}
 		return null;
 	}
+	public void set_instance(Object a){
+		this.instance = a;
+	}
 }

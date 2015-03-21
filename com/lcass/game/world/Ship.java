@@ -3,6 +3,8 @@ package com.lcass.game.world;
 import java.util.ArrayList;
 
 import com.lcass.core.Core;
+import com.lcass.entity.CrewHandler;
+import com.lcass.entity.Human;
 import com.lcass.game.tiles.Tile;
 import com.lcass.game.world.resources.Resourcehandler;
 import com.lcass.graphics.Effect_builder;
@@ -10,6 +12,7 @@ import com.lcass.graphics.Particles;
 import com.lcass.graphics.TextGenerator;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
+import com.lcass.util.Path;
 
 public class Ship {
 	public world ship;
@@ -37,6 +40,7 @@ public class Ship {
 	private boolean particles_generated = false;
 	private Particles particles;
 	private Resourcehandler resources;
+	private CrewHandler crew_handler;
 	public Vertex2d absolute_position, position, BackCOM, ForeCOM, UpCOM,
 			DownCOM, COM, camera, forwardthrust, upthrust, downthrust,// position
 																		// is a
@@ -81,16 +85,33 @@ public class Ship {
 		this.sh = sh;
 		generate_edges();
 		resources = new Resourcehandler(this);
+		crew_handler = new CrewHandler(core,this);
+		crew_handler.add_crew(new Human(core,crew_handler));
+		Path temp = new Path();
+		temp.add_step(new Vertex2d(32,0));
+		temp.add_step(new Vertex2d(0,32));
+		temp.add_step(new Vertex2d(32,0));
+		temp.add_step(new Vertex2d(32,0));
+		temp.add_step(new Vertex2d(32,0));
+		temp.add_step(new Vertex2d(0,32));
+		temp.add_step(new Vertex2d(0,32));
+		temp.add_step(new Vertex2d(0,32));
+		temp.add_step(new Vertex2d(0,32));
+		temp.add_step(new Vertex2d(32,0));
+		temp.add_step(new Vertex2d(32,0));
+		temp.add_step(new Vertex2d(32,0));
+		crew_handler.get_crew(0).set_path(temp);
 	}
 
 	public void damage(Vertex2d position, int damage) {
 		int coordinate = (int) (position.x + (ship.mapwidth * position.y));
-		
+
 		if (map[coordinate] != null) {
-			
-			if(map[coordinate].damage(damage)){
+
+			if (map[coordinate].damage(damage)) {
 				remove_tile(position);
-				
+				update();
+
 			}
 		}
 		generate_edges();
@@ -188,20 +209,22 @@ public class Ship {
 		int id_up_len = 0, id_down_len = 0, id_right_len = 0, id_left_len = 0;
 		for (int i = 0; i < temp.length; i++) {
 			if (temp[i] != null) {
-				if (temp[i].get_name() == "thruster") {
-					switch (temp[i].get_dir()) {
-					case 0:
-						id_right_len += 1;
-						break;
-					case 1:
-						id_left_len += 1;
-						break;
-					case 2:
-						id_up_len += 1;
-						break;
-					case 3:
-						id_down_len += 1;
-						break;
+				if (temp[i].get_active()) {
+					if (temp[i].get_name() == "thruster") {
+						switch (temp[i].get_dir()) {
+						case 0:
+							id_right_len += 1;
+							break;
+						case 1:
+							id_left_len += 1;
+							break;
+						case 2:
+							id_up_len += 1;
+							break;
+						case 3:
+							id_down_len += 1;
+							break;
+						}
 					}
 				}
 			}
@@ -220,24 +243,26 @@ public class Ship {
 		id_left_len = 0;
 		for (int i = 0; i < temp.length; i++) {
 			if (temp[i] != null) {
-				if (temp[i].get_name() == "thruster") {
-					switch (temp[i].get_dir()) {
-					case 0:
-						id_right[id_right_len] = i;
-						id_right_len += 1;
-						break;
-					case 1:
-						id_left[id_left_len] = i;
-						id_left_len += 1;
-						break;
-					case 2:
-						id_up[id_up_len] = i;
-						id_up_len += 1;
-						break;
-					case 3:
-						id_down[id_down_len] = i;
-						id_down_len += 1;
-						break;
+				if (temp[i].get_active()) {
+					if (temp[i].get_name() == "thruster") {
+						switch (temp[i].get_dir()) {
+						case 0:
+							id_right[id_right_len] = i;
+							id_right_len += 1;
+							break;
+						case 1:
+							id_left[id_left_len] = i;
+							id_left_len += 1;
+							break;
+						case 2:
+							id_up[id_up_len] = i;
+							id_up_len += 1;
+							break;
+						case 3:
+							id_down[id_down_len] = i;
+							id_down_len += 1;
+							break;
+						}
 					}
 				}
 			}
@@ -259,21 +284,22 @@ public class Ship {
 				if (temp[i] == null) {
 					continue;
 				}
+				if (temp[i].get_active()) {
+					if (temp[i].get_name() == "thruster"
+							&& temp[i].get_dir() == curdir) {
+						total += temp[i].get_thrust();
+						xsum += temp[i].get_pos().x * temp[i].get_thrust();
+						ysum += temp[i].get_pos().y * temp[i].get_thrust();
 
-				if (temp[i].get_name() == "thruster"
-						&& temp[i].get_dir() == curdir) {
-					total += temp[i].get_thrust();
-					xsum += temp[i].get_pos().x * temp[i].get_thrust();
-					ysum += temp[i].get_pos().y * temp[i].get_thrust();
-
-					if (curdir == 0) {
-						powerright += temp[i].get_thrust();
-					} else if (curdir == 1) {
-						powerleft += temp[i].get_thrust();
-					} else if (curdir == 2) {
-						powerup += temp[i].get_thrust();
-					} else if (curdir == 3) {
-						powerdown += temp[i].get_thrust();
+						if (curdir == 0) {
+							powerright += temp[i].get_thrust();
+						} else if (curdir == 1) {
+							powerleft += temp[i].get_thrust();
+						} else if (curdir == 2) {
+							powerup += temp[i].get_thrust();
+						} else if (curdir == 3) {
+							powerdown += temp[i].get_thrust();
+						}
 					}
 				}
 			}
@@ -628,6 +654,8 @@ public class Ship {
 		position_string.render();
 		effects.render();
 		particles.render();
+		crew_handler.render();
+		
 
 	}
 
@@ -648,7 +676,7 @@ public class Ship {
 
 	public void handle_particles(boolean right, boolean left, boolean up,
 			boolean down) {
-		if(!particles_generated){
+		if (!particles_generated) {
 			return;
 		}
 		float cos = (float) Math.cos(compound_rotation);
@@ -721,8 +749,11 @@ public class Ship {
 	public Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
 
 	public void tick() {
+		crew_handler.tick();
+		
+		
 		resources.tick();
-		if(ship.hasdata){
+		if (ship.hasdata) {
 			update_network();
 		}
 		rotpoint = new Vertex2d(((COM.x * 32) - camera.x * 2) - 16,
@@ -771,25 +802,25 @@ public class Ship {
 		ship.tick();
 		effects.tick();
 	}
-	public void generate_edges(){
+
+	public void generate_edges() {
 		ArrayList<Tile> edge = new ArrayList<Tile>();
-		for(int i = 0;i < map.length;i++){
-			if(map[i] != null){
-				if(check_edge(i)){
+		for (int i = 0; i < map.length; i++) {
+			if (map[i] != null) {
+				if (check_edge(i)) {
 					edge.add(map[i]);
 				}
 			}
 		}
 		edges = com.lcass.util.Util.cast_tile(edge.toArray());
 		collision = new Vertex2d[edges.length];
-		for(int i = 0; i< edges.length;i++){
+		for (int i = 0; i < edges.length; i++) {
 			Vertex2d temp = edges[i].get_pos().xy();
 			temp.mult(32);
-			collision[i] = new Vertex2d(temp.x,temp.y,temp.x + 32,temp.y + 32);
+			collision[i] = new Vertex2d(temp.x, temp.y, temp.x + 32,
+					temp.y + 32);
 		}
 	}
-
-	
 
 	public boolean check_edge(int pos) {
 		int up = pos - ship.mapwidth;
@@ -852,7 +883,7 @@ public class Ship {
 		calculate_steps();
 		generate_edges();
 		reset_particles();
-		
+
 	}
 
 	public void calculate_masscentre() {
@@ -901,7 +932,9 @@ public class Ship {
 	public void set_world(Tile[] t) {
 
 		map = t;
-		
+		ship.set_data(t);
+		generate_edges();
+		update();
 		calculate_masscentre();
 		calculate_COT();
 	}
@@ -927,6 +960,13 @@ public class Ship {
 		effects_generated = false;
 
 	}
+	public void update_movement(){
+		calculate_masscentre();
+		calculate_COT();
+		calculate_steps();
+		particles_generated = false;
+		effects_generated = false;
+	}
 
 	public void toggle_ai() {
 		is_ai = !is_ai;
@@ -935,68 +975,93 @@ public class Ship {
 	public void cleanup() {
 		ship.cleanup();
 	}
-	public void reset_particles(){
+
+	public void reset_particles() {
 		particles.clear();
 		effects.clear();
 	}
-	public Vertex2d cable_pos(int pos){
-		
-		Vertex2d poses = new Vertex2d(-1,-1,-1,-1);
-		
-		if(pos > 0){
-			if(map[pos-1] != null){
-				if(map[pos -1].is_electric()){
+
+	public Vertex2d cable_pos(int pos) {
+
+		Vertex2d poses = new Vertex2d(-1, -1, -1, -1);
+
+		if (pos > 0) {
+			if (map[pos - 1] != null) {
+				if (map[pos - 1].is_electric()) {
 					poses.set_x(pos - 1);
 				}
 			}
 		}
-		if(pos < map.length){
-			if(map[pos+1] != null){
-				if(map[pos + 1].is_electric()){
+		if (pos < map.length) {
+			if (map[pos + 1] != null) {
+				if (map[pos + 1].is_electric()) {
 					poses.set_y(pos + 1);
 				}
 			}
 		}
-		if(pos > ship.mapwidth){
-			if(map[pos - ship.mapwidth] != null){
-				if(map[pos - ship.mapwidth].is_electric()){
+		if (pos > ship.mapwidth) {
+			if (map[pos - ship.mapwidth] != null) {
+				if (map[pos - ship.mapwidth].is_electric()) {
 					poses.set_u(pos - ship.mapwidth);
 				}
 			}
 		}
-		if(pos < map.length - ship.mapwidth){
-			if(map[pos+ship.mapwidth] != null){
-				if(map[pos+ ship.mapwidth].is_electric()){
+		if (pos < map.length - ship.mapwidth) {
+			if (map[pos + ship.mapwidth] != null) {
+				if (map[pos + ship.mapwidth].is_electric()) {
 					poses.set_v(pos + ship.mapwidth);
 				}
 			}
 		}
 		return poses;
 	}
+
 	public int[] electronics;
-	public void calculate_electronics(){
+
+	public void calculate_electronics() {
 		ArrayList<Integer> checked = new ArrayList<Integer>();
-		for(int i = 0;i < map.length;i++){
-		
-			if(map[i] != null){
-				
-			if(map[i].is_electric()){
-				
-				checked.add(i);
-				
-			}
+		for (int i = 0; i < map.length; i++) {
+
+			if (map[i] != null) {
+
+				if (map[i].is_electric()) {
+
+					checked.add(i);
+
+				}
 			}
 		}
 		electronics = new int[checked.size()];
-		for(int i = 0;i < electronics.length;i++){
+		for (int i = 0; i < electronics.length; i++) {
 			electronics[i] = checked.get(i);
 		}
 	}
-	public void update_network(){
+
+	public void update_network() {
 		calculate_electronics();
 		resources.calculate_resources();
-		
+
 	}
 
-	
+	public void increase_voltage() {
+
+		resources.increase_voltage(10);
+	}
+
+	public void decrease_voltage() {
+		resources.decrease_voltage(10);
+	}
+
+	public float get_voltage() {
+		return resources.get_voltage();
+	}
+
+	public float get_resistance() {
+		return resources.get_resistance();
+	}
+
+	public float get_power() {
+		return resources.get_power();
+	}
+
 }

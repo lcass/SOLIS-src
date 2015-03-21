@@ -3,6 +3,7 @@ package com.lcass.game.world.resources;
 import java.util.ArrayList;
 
 import com.lcass.game.tiles.Tile;
+import com.lcass.game.world.Ship;
 
 public class network {
 	public ArrayList<Tile> sources = new ArrayList<Tile>();
@@ -15,9 +16,11 @@ public class network {
 	public float resistance = 0;// ohms
 	private boolean updated = false;
 	private boolean pipe = false;
+	private Ship ship;
 
-	public network(boolean pipe) {
+	public network(boolean pipe,Ship s) {
 		this.pipe = pipe;
+		ship = s;
 	}
 
 	public void reset() {
@@ -38,6 +41,7 @@ public class network {
 
 	public void add_consumer(Tile a) {
 		consumers.add(a);
+
 		update();
 	}
 
@@ -54,13 +58,12 @@ public class network {
 			requested_power = 0;
 			resistance = 0;
 			for (int i = 0; i < sources.size(); i++) {
-				System.out.println("sources added");
-				
+
 				total_power += sources.get(i).get_power();
-				
+
 			}
 			for (int i = 0; i < wire.size(); i++) {
-				
+
 				resistance += wire.get(i).get_resistance();
 			}
 			// asuming watts = total_power and initial voltage is 50v
@@ -76,18 +79,24 @@ public class network {
 				current_power = total_power;
 			}
 			for (int i = 0; i < consumers.size(); i++) {
-				consumers.get(i).set_active(false);
-				requested_power += consumers.get(i).get_power();
-				if (consumers.get(i).get_power() > current_power) {
-					current_power -= consumers.get(i).get_power();
-					consumers.get(i).set_active(true);
+				//if (ship.map[consumers.get(i).get_array_pos()].get_active()) {
+					ship.map[consumers.get(i).get_array_pos()].set_active(false);
+					requested_power += consumers.get(i).get_power();
+					if (consumers.get(i).get_power() <= current_power) {
+						current_power -= consumers.get(i).get_power();
+						ship.map[consumers.get(i).get_array_pos()].set_active(true);
+
+					//}
 				}
 			}
+			ship.update_movement();
 
 		}
-		System.out.println(current_power);
-		System.out.println(resistance);
-	
 
+	}
+
+	public void changevoltage(float value) {
+		voltage += value;
+		updated = true;
 	}
 }

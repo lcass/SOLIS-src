@@ -9,5 +9,7 @@ public class DEFINES{
 	public static final int SHIP_MAX = 1000;
 	public static final int CREW_MAX = 100;
 	public static final int DEFAULT_GYRO_POWER = 1;
-
+	public static final int ENTITY_WIDTH = 32;
+	public static final int ENTITY_HEIGHT = 32;
+	
 }

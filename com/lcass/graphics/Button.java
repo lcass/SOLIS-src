@@ -62,6 +62,7 @@ public class Button{
 			
 			if(actual){
 				if(call != null){
+					System.out.println("called");
 					call.call();
 				}
 				
@@ -76,6 +77,9 @@ public class Button{
 		}
 		
 		
+	}
+	public void set_instance(Object a){
+		call.set_instance(a);
 	}
 	
 }

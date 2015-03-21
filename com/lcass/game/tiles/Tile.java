@@ -25,6 +25,7 @@ public abstract class Tile implements Serializable{
 	protected int netnum = 0;
 	protected float resistance = 0;
 	protected int type = 0;
+	protected int array_pos = 0;
 	private int ship = 0;
 	private boolean supports_sub = false;
 	public Tile(){
@@ -217,6 +218,12 @@ public abstract class Tile implements Serializable{
 	public void bind_sub(){
 		this.private_update();
 		this.sub_tile.sub.bind();
+	}
+	public void set_array_pos(int i){
+		array_pos = i;
+	}
+	public int get_array_pos(){
+		return this.array_pos;
 	}
 	
 }

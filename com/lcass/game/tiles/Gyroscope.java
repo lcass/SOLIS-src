@@ -23,6 +23,8 @@ public class Gyroscope extends Tile{
 		spritepos = com.lcass.util.Util.tex_coordinate(5, 1);
 		this.core = core;
 		electric = true;
+		consumer = true;
+		power = 5;
 
 	}
 	public void init(Core core){
@@ -30,6 +32,8 @@ public class Gyroscope extends Tile{
 		spritepos = com.lcass.util.Util.tex_coordinate(5, 1);
 		this.position = new Vertex2d(0,0);
 		electric = true;
+		consumer = true;
+		power = 5;
 	}
 	
 	public Vertex2d getsprite(
@@ -113,8 +117,6 @@ public class Gyroscope extends Tile{
 	public boolean damage(int a) {
 		return true;
 	}
-	public boolean is_user(){
-		return true;
-	}
+	
 	
 }

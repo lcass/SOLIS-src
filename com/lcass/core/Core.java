@@ -25,14 +25,14 @@ public class Core{
 	private Progressive_buffer[] background;
 	private spritesheet background_sprite;
 	public spritesheet effect_sprite,particle_sprite;
+	public spritesheet crew_sprite;
 	public spritesheet tile_sprite;
 	public Core(){
 		G = new graphics(this);
-		G.create_display(width, height, "SOLIS", 10000, 60);
+		G.create_display(width, height, "SOLIS", 120, 60);
 		
 		ih = new InputHandler(this);
-		
-		
+		crew_sprite = new spritesheet("textures/blocksprites.png");
 		//bind close function
 		Method close = G.obtain_method(this.getClass(), "cleanup");
 		G.bind_close_function(close);
@@ -58,8 +58,6 @@ public class Core{
 		//setup background
 		VBO backgroundtemp = new VBO(G.mainvbo);
 		background = G.rectangle(0, 0, this.width, this.height, background_sprite.getcoords(0,0,1920,1080));
-		a = new world(this,64,64);
-		b = new world(this,64,64);
 		backgroundtemp.create(background);
 		backgroundtemp.bind_texture(background_sprite.gettexture());
 		backgroundtemp.set_bloom(true);

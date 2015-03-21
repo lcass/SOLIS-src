@@ -6,7 +6,6 @@ import com.lcass.core.Core;
 import com.lcass.game.tiles.Tile;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
-import com.lcass.util.Progressive_buffer;
 
 public class shiphandler {
 	public Ship[] world_ships;
@@ -24,6 +23,7 @@ public class shiphandler {
 		v = new VBO(core.G.mainvbo);
 		v.bind_texture(core.effect_sprite.gettexture());
 		v.create(50 * 12);
+		coreship = new Ship(64,64,core,new world(core,64,64),this);
 		
 	}
 
@@ -248,8 +248,7 @@ public class shiphandler {
 
 				Object[] temp = tiles_list.get((i) - start_curr).toArray();
 				Tile[] data = com.lcass.util.Util.cast_tile(temp);
-				coreship = new Ship(64, 64, core,
-						new world(core, 64, 64, data), this);
+				coreship = new Ship(64,64,core,new world(core,64,64,data),this);
 				break;
 			}
 		}

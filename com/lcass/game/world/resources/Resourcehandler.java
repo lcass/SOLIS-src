@@ -76,6 +76,7 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 		ship.calculate_electronics();
 		int[] electronics = ship.electronics;
 		int curr_network = 1;
+		networks.clear();
 		for(int i = 0;i < electronics.length;i++){
 			if(ship.map[electronics[i]] != null){
 				ship.map[electronics[i]].set_network(0);
@@ -86,9 +87,9 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 			if (ship.map[electronics[i]].is_supplier()
 					&& ship.map[electronics[i]].get_network() == 0) {
 				ship.map[electronics[i]].set_network(curr_network);
-				networks.add(new network(false));
+				networks.add(new network(false,ship));
 
-				int netpos = curr_network - 1;
+				
 				Vertex2d coordinatev = ship.map[electronics[i]].get_pos()
 						.whole();
 				
@@ -103,7 +104,6 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 			if (ship.map[pos].get_network() != 0) {
 				
 				if (ship.map[pos].is_supplier()) {
-					System.out.println("testing");
 					networks.get(ship.map[pos].get_network() - 1).add_source(
 							ship.map[pos]);
 				
@@ -113,13 +113,47 @@ public class Resourcehandler {// designed to handle all resources on a ship.
 							ship.map[pos]);
 					
 				}
-				if (ship.map[pos].is_sub()) {
+				if (ship.map[pos].is_user()) {
 					networks.get(ship.map[pos].get_network() - 1).add_consumer(
 							ship.map[pos]);
 				}
 			}
 		}
+		this.ship.update_movement();
 
 	}
+	public void increase_voltage(int increment){
+		for(network n: networks){
+		
+			n.changevoltage(increment);
+		}
+	}
+	public void decrease_voltage(int increment){
+		for(network n: networks){
+			if(n.voltage > increment){
+				n.changevoltage(-increment);
+			}
+		}
+	}
+	public float get_voltage(){
+		if(networks.size()>0){
+			return networks.get(0).voltage;
+		}
+		return 0;
+	}
+	public float get_resistance(){
+		if(networks.size()>0){
+			return networks.get(0).resistance;
+		}
+		return 0;
+	}
+
+	public float get_power(){
+		if(networks.size()>0){
+			return networks.get(0).current_power;
+		}
+		return 0;
+	}
+
 
 }
