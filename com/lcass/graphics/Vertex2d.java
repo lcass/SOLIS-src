@@ -98,4 +98,11 @@ public class Vertex2d {//2d for texture and for vert coords
 	public void set_v(float v){
 		this.v = v;
 	}
+	public Vertex2d to_int(){
+		x = (int)x;
+		y = (int)y;
+		u = (int)u;
+		v = (int)v;
+		return this;
+	}
 }

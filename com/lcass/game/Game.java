@@ -164,8 +164,8 @@ public class Game {
 		ships = new shiphandler(core, 100);
 		Method voltage_up = core.G.obtain_method(Ship.class,"increase_voltage");
 		Method voltage_down = core.G.obtain_method(Ship.class, "decrease_voltage");
-	//	power_control.bind_button(new Vertex2d(16,core.height-60,26,70), false, new Encapsulated_method(voltage_down,null,ships.coreship));
-		power_control.bind_button(new Vertex2d(30,core.height-60,40,70), false, new Encapsulated_method(voltage_up,null,ships.coreship));
+		power_control.bind_button(new Vertex2d(16,core.height-60,26,10), false, new Encapsulated_method(voltage_down,null,ships.coreship));
+		power_control.bind_button(new Vertex2d(26,core.height-60,36,10), false, new Encapsulated_method(voltage_up,null,ships.coreship));
 		world w = new world(core, 64, 64);
 		w.add_tile(new Wall(new Vertex2d(0, 0), core, w));
 		w.add_tile(new Wall(new Vertex2d(1, 0), core, w));
@@ -179,7 +179,7 @@ public class Game {
 		w.add_tile(new Wall(new Vertex2d(1, 2), core, w));
 		Ship s = new Ship(64, 64, core, w, ships);
 		s.set_position(new Vertex2d(0, 0));
-		ships.add_ship(s);
+	//	ships.add_ship(s);
 	}
 
 	public void tick() {

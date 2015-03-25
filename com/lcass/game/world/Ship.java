@@ -385,10 +385,10 @@ public class Ship {
 			rotated = com.lcass.util.Util.rotate(COM, ForeCOM,
 					compound_rotation);
 			velocity_horiz += forwardstep.x
-					* (Math.abs(rotated.x - ForeCOM.x) / 60)
+					* (Math.abs(rotated.x - ForeCOM.x))
 					* Math.cos(compound_rotation);// current velocity
 			velocity_vert += forwardstep.x
-					* (-Math.abs(rotated.y - ForeCOM.y) / 60)
+					* (-Math.abs(rotated.y - ForeCOM.y))
 					* Math.sin(compound_rotation);
 			Vertex2d temp = core.G.central_product(COM, forwardthrust);
 			position.u += forwardthrust.u * forwardstep.x * temp.y * temp.x;// multiply
@@ -406,10 +406,10 @@ public class Ship {
 			rotated = com.lcass.util.Util.rotate(COM, BackCOM,
 					compound_rotation);
 			velocity_horiz += backstep.x
-					* (-Math.abs(rotated.x - BackCOM.x) / 60)
+					* (-Math.abs(rotated.x - BackCOM.x) )
 					* Math.cos(compound_rotation);// current velocity
 			velocity_vert += backstep.x
-					* ((Math.abs(rotated.y - BackCOM.y) / 60))
+					* ((Math.abs(rotated.y - BackCOM.y) ))
 					* Math.sin(compound_rotation);// its not x and y they are
 													// just the
 			// positions in the vector
@@ -426,9 +426,9 @@ public class Ship {
 		}
 		if (up) {
 			rotated = com.lcass.util.Util.rotate(COM, UpCOM, compound_rotation);
-			velocity_horiz += upstep.x * (Math.abs(rotated.x - UpCOM.x) / 60)
+			velocity_horiz += upstep.x * (Math.abs(rotated.x - UpCOM.x))
 					* Math.sin(compound_rotation);// current velocity
-			velocity_vert += upstep.x * (Math.abs(rotated.y - UpCOM.y) / 60)
+			velocity_vert += upstep.x * (Math.abs(rotated.y - UpCOM.y))
 					* Math.cos(compound_rotation);
 			Vertex2d temp = core.G.central_product(COM, upthrust);
 			position.u += upthrust.u * upstep.x * temp.y * temp.x;// multiply by
@@ -442,10 +442,10 @@ public class Ship {
 			rotated = com.lcass.util.Util.rotate(COM, DownCOM,
 					compound_rotation);
 			velocity_horiz += downstep.x
-					* (-Math.abs(rotated.x - DownCOM.x) / 60)
+					* (-Math.abs(rotated.x - DownCOM.x))
 					* Math.sin(compound_rotation);// current velocity
 			velocity_vert += downstep.x
-					* (-Math.abs(rotated.y - DownCOM.y) / 60)
+					* (-Math.abs(rotated.y - DownCOM.y))
 					* Math.cos(compound_rotation);
 			Vertex2d temp = core.G.central_product(COM, downthrust);
 			position.u += downthrust.u * downstep.x * temp.y * temp.x;// multiply
@@ -649,7 +649,7 @@ public class Ship {
 	}
 
 	public void render() {
-
+		
 		ship.render();
 		position_string.render();
 		effects.render();
@@ -747,9 +747,9 @@ public class Ship {
 	}
 
 	public Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
-
+	public Vertex2d correct_pos = new Vertex2d(0,0,0,0);
 	public void tick() {
-		crew_handler.tick();
+		
 		
 		
 		resources.tick();
@@ -762,8 +762,13 @@ public class Ship {
 			particles.tick();
 			particles.translate(new Vertex2d(camera.x, camera.y));
 		}
-		absolute_position.x += position.x;
-		absolute_position.y += position.y;
+		Vertex2d adjusted = core.G.convert_coordinates(position);
+		absolute_position.x += adjusted.x;
+		absolute_position.y += adjusted.y;
+		correct_pos.x += position.x;
+		correct_pos.y += position.y;
+		crew_handler.set_last(correct_pos);
+		crew_handler.tick();
 		if (!position_manual) {
 			effects.transform(camera);
 		}
@@ -774,7 +779,7 @@ public class Ship {
 
 		effects.set_rot_pos(rotpoint);
 
-		rotation += -(position.u);
+		rotation += -(position.u /100);
 		compound_rotation = rotation + rotation_offset;
 
 		if (is_ai) {
@@ -793,8 +798,8 @@ public class Ship {
 
 	public void update_pos() {
 		position_manual = true;
-		Vertex2d campos = new Vertex2d(-camera.x + absolute_position.x,
-				-camera.y + absolute_position.y);
+		Vertex2d campos = core.G.convert_coordinates((int)(-camera.x + absolute_position.x),(int)(
+				-camera.y + absolute_position.y));
 		particles.translate(campos);
 		effects.transform(campos);
 		particles.tick();
@@ -1062,6 +1067,14 @@ public class Ship {
 
 	public float get_power() {
 		return resources.get_power();
+	}
+	public Tile get_tile(int position){
+		if(position >= 0){
+			if(position < map.length){
+				return map[position];
+			}
+		}
+		return null;
 	}
 
 }

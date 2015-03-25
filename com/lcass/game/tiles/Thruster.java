@@ -13,7 +13,7 @@ public class Thruster extends Tile{
 	private Sub_Tile sub_tile;
 	private int index;
 	private int dir = 0;//1 left 0 right 2 up 3 down
-	private float thrust = 0.01f;
+	private float thrust = 1f;
 	public String name = "thruster";
 	private int ship = 0;
 	public Thruster(){
