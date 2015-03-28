@@ -43,7 +43,7 @@ public abstract class Sub_Tile extends Tile{
 	public void set_index(int index){
 		
 	}
-	public Tile get_super(){
+	public Tile get_super_tile(){
 		return this.super_tile;
 	}
 	public void set_super(Tile super_tile){

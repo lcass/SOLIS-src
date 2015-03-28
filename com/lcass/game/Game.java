@@ -317,7 +317,7 @@ public class Game {
 
 				world.rotate(0);
 				ships.generate_ships(world.get_map(), world.mapwidth);
-
+				ships.coreship.crew_handler.get_crew(0).move_to_loc(new Vertex2d(32 * 5, 32  *2));
 			} else {
 				world.reset();
 				world.set_world(world);

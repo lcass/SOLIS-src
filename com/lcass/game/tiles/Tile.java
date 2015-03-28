@@ -27,6 +27,7 @@ public abstract class Tile implements Serializable{
 	protected int type = 0;
 	protected int array_pos = 0;
 	private int ship = 0;
+	protected int super_tile = 0;
 	private boolean supports_sub = false;
 	public Tile(){
 		
@@ -39,7 +40,7 @@ public abstract class Tile implements Serializable{
 	}
 	
 	public Tile(Vertex2d position, Core core,world world){
-		this.position = new Vertex2d(0,0);
+		this.position = position;
 		spritepos = new Vertex2d(0,0,16,16);
 		this.core = core;
 		this.world = world;
@@ -224,6 +225,12 @@ public abstract class Tile implements Serializable{
 	}
 	public int get_array_pos(){
 		return this.array_pos;
+	}
+	public void set_super(int id){
+		super_tile = id;
+	}
+	public int get_super(){
+		return super_tile;
 	}
 	
 }

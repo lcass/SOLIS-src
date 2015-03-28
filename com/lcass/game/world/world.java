@@ -86,6 +86,7 @@ public class world {
 			tilemap[coordinate] = t;
 			tilemap[coordinate].set_world(this);
 			tilemap[coordinate].bind();
+			tilemap[coordinate].setpos((int)pos.x,(int)pos.y);
 			tilemap[coordinate].set_array_pos(coordinate);
 			if (render_COM) {
 				update_COM();
@@ -107,6 +108,7 @@ public class world {
 			t.set_index(index);
 			tilemap[coordinate] = t;
 			tilemap[coordinate].bind_index();
+			tilemap[coordinate].setpos((int)pos.x,(int)pos.y);
 			tilemap[coordinate].set_array_pos(coordinate);
 			if (render_COM) {
 				update_COM();

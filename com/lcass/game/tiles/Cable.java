@@ -66,9 +66,7 @@ public class Cable extends Sub_Tile{
 		return 0.2f;
 	}
 
-	public Tile get_super() {
-		return this.super_tile;
-	}
+	
 
 	public void set_super(Tile super_tile) {
 		this.super_tile = super_tile;

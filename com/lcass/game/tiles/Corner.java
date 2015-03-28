@@ -48,9 +48,7 @@ public class Corner extends Sub_Tile{
 	public float get_mass(){
 		return 1;
 	}
-	public Tile get_super(){
-		return this.super_tile;
-	}
+
 	public void set_super(Tile super_tile){
 		this.super_tile = super_tile;
 	}

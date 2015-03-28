@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.lcass.core.Core;
 import com.lcass.entity.CrewHandler;
+import com.lcass.entity.Entity;
 import com.lcass.entity.Human;
 import com.lcass.game.tiles.Tile;
 import com.lcass.game.world.resources.Resourcehandler;
@@ -12,7 +13,6 @@ import com.lcass.graphics.Particles;
 import com.lcass.graphics.TextGenerator;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
-import com.lcass.util.Path;
 
 public class Ship {
 	public world ship;
@@ -40,7 +40,7 @@ public class Ship {
 	private boolean particles_generated = false;
 	private Particles particles;
 	private Resourcehandler resources;
-	private CrewHandler crew_handler;
+	public CrewHandler crew_handler;
 	public Vertex2d absolute_position, position, BackCOM, ForeCOM, UpCOM,
 			DownCOM, COM, camera, forwardthrust, upthrust, downthrust,// position
 																		// is a
@@ -86,21 +86,10 @@ public class Ship {
 		generate_edges();
 		resources = new Resourcehandler(this);
 		crew_handler = new CrewHandler(core,this);
-		crew_handler.add_crew(new Human(core,crew_handler));
-		Path temp = new Path();
-		temp.add_step(new Vertex2d(32,0));
-		temp.add_step(new Vertex2d(0,32));
-		temp.add_step(new Vertex2d(32,0));
-		temp.add_step(new Vertex2d(32,0));
-		temp.add_step(new Vertex2d(32,0));
-		temp.add_step(new Vertex2d(0,32));
-		temp.add_step(new Vertex2d(0,32));
-		temp.add_step(new Vertex2d(0,32));
-		temp.add_step(new Vertex2d(0,32));
-		temp.add_step(new Vertex2d(32,0));
-		temp.add_step(new Vertex2d(32,0));
-		temp.add_step(new Vertex2d(32,0));
-		crew_handler.get_crew(0).set_path(temp);
+		Entity add = new Human(core,crew_handler);
+		add.set_position(new Vertex2d(16,16));
+		crew_handler.add_crew(add);
+		
 	}
 
 	public void damage(Vertex2d position, int damage) {
@@ -767,7 +756,6 @@ public class Ship {
 		absolute_position.y += adjusted.y;
 		correct_pos.x += position.x;
 		correct_pos.y += position.y;
-		crew_handler.set_last(correct_pos);
 		crew_handler.tick();
 		if (!position_manual) {
 			effects.transform(camera);
