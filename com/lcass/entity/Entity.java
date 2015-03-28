@@ -63,59 +63,59 @@ public abstract class Entity {
 		if (current_addition[3] != -1) {
 			open.add(current_addition[3]);
 		}
-		int position = 0;
-
-		while (position < open.size()) {
-			boolean skip = false;
-			for (int i = 0; i < closed.size(); i++) {
-				if (closed.get(i) == open.get(position)) {
-					skip = true;
-
+		
+		while(!open.isEmpty()){
+			
+			int lowest_pos = open.get(0);
+			int lowest_heuristic = 0;
+			int open_pos = 0;
+			int heuristic = 0;
+			for(int i = 0; i < open.size();i++){
+				
+				Tile ct = handler.ship.get_tile(open.get(i));
+				heuristic = (int)Math.sqrt(Math.pow(finish.x - ct.get_pos().x,2) + Math.pow(finish.y - ct.get_pos().y,2)); 
+				if(i == 0){
+					lowest_heuristic = heuristic;
+				}
+				if(heuristic < lowest_heuristic){
+					open_pos = i;
+					lowest_pos = open.get(i);
+					lowest_heuristic = heuristic;
 				}
 			}
-			if (skip) {
-
-				position++;
-				continue;
-			}
-
-			int selected_tile = open.get(position);
-
-			closed.add(selected_tile);
-			Tile current = handler.ship.get_tile(selected_tile);
-			Tile super_tile = handler.ship.get_tile(current.get_super());
-			int heuris = (int) Math.sqrt(Math.pow(current.get_pos().x
-					- finish.x, 2)
-					+ Math.pow(current.get_pos().y - finish.y, 2));
-			int super_heuris = (int) Math.sqrt(Math.pow(super_tile.get_pos().x
-					- finish.x, 2)
-					+ Math.pow(super_tile.get_pos().y - finish.y, 2));
-			System.out.println(heuris);
-			current_addition = moveable(selected_tile, closed, open);
-			if (heuris == 0) {
-				System.out.println("found");
+			if(heuristic == 0){
 				this.path = new Path();
+				int current_t = lowest_pos;
+				int super_t = handler.ship.get_tile(lowest_pos)
+						.get_super();
+				while (current_t != current_tile) {
+					Tile ct = handler.ship.get_tile(current_t);
+					Tile st = handler.ship.get_tile(super_t);
+					Vertex2d change = ct.get_pos().whole()
+							.sub(st.get_pos()).mult(16);
+					path.add_step(change);
+					current_t = super_t;
+					super_t = handler.ship.get_tile(current_t).get_super();
+				}
+				path.add_step(movement);
+				path.invert();
 				return;
 			}
-			if (heuris <= super_heuris) {
-				if (current_addition[0] != -1) {
-					open.add(current_addition[0]);
-
-				}
-				if (current_addition[1] != -1) {
-					open.add(current_addition[1]);
-
-				}
-				if (current_addition[2] != -1) {
-					open.add(current_addition[2]);
-
-				}
-				if (current_addition[3] != -1) {
-					open.add(current_addition[3]);
-
-				}
+			closed.add(lowest_pos);
+			open.remove(open_pos);
+			current_addition = moveable(lowest_pos, closed, open);
+			if (current_addition[0] != -1) {
+				open.add(current_addition[0]);
 			}
-			position += 1;
+			if (current_addition[1] != -1) {
+				open.add(current_addition[1]);
+			}
+			if (current_addition[2] != -1) {
+				open.add(current_addition[2]);
+			}
+			if (current_addition[3] != -1) {
+				open.add(current_addition[3]);
+			}
 		}
 		this.path = new Path();
 	}
@@ -170,11 +170,13 @@ public abstract class Entity {
 
 		return data;
 	}
-
+//	
 	protected boolean can_move(int a, ArrayList<Integer> closed,
 			ArrayList<Integer> open) {
 		if (handler.ship.get_tile(a) != null) {
-
+			if(handler.ship.get_tile(a).is_wall()){
+				return false;
+			}
 			for (int i = 0; i < closed.size(); i++) {
 				if (closed.get(i) == a) {
 

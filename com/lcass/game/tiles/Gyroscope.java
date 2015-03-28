@@ -25,6 +25,7 @@ public class Gyroscope extends Tile{
 		electric = true;
 		consumer = true;
 		power = 5;
+		is_wall = true;
 
 	}
 	public void init(Core core){
@@ -34,6 +35,7 @@ public class Gyroscope extends Tile{
 		electric = true;
 		consumer = true;
 		power = 5;
+		is_wall = true;
 	}
 	
 	public Vertex2d getsprite(

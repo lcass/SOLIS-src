@@ -26,7 +26,7 @@ public class Path {
 	public void invert(){
 		Vertex2d[] finished = new Vertex2d[path.size()];
 		for(int i =  path.size();i > 0;i --){
-			finished[path.size() - i] = path.get(i);
+			finished[path.size() - i] = path.get(i- 1);
 		}
 		path.clear();
 		for(int i = 0; i < finished.length;i++){

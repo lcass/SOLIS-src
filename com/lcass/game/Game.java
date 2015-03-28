@@ -33,7 +33,7 @@ public class Game {
 	public Vertex2d camera = new Vertex2d(0, 0);
 	public boolean docked = true;
 	private boolean show_power = true;
-	private int resistance_loc,voltage_loc,power_loc = 0;
+	private int resistance_loc, voltage_loc, power_loc = 0;
 	public shiphandler ships;
 	private int tile_dir = 0;
 
@@ -42,15 +42,21 @@ public class Game {
 		this.core = core;
 		spritesheet player = new spritesheet("textures/inventory.png");
 		spritesheet voltage_sprite = new spritesheet("textures/playerGUI.png");
-		inventory_gui = new GUI(new Vertex2d(core.width - (82 * 2),
-				core.height - (293 * 2), 82 * 2, 293 * 2),core.G.rectangle(core.width - (82 * 2),
-				core.height - (293 * 2), 82 * 2, 293 * 2,
+		inventory_gui = new GUI(new Vertex2d(core.width - (82 * 2), core.height
+				- (293 * 2), 82 * 2, 293 * 2), core.G.rectangle(core.width
+				- (82 * 2), core.height - (293 * 2), 82 * 2, 293 * 2,
 				player.getcoords(17, 0, 99, 293)), player.gettexture(), core);
 		inventory = new Inventory(30, this);
-		power_control = new GUI(new Vertex2d(0,core.height - (37 * 2),57 * 2, 37 * 2),core.G.rectangle(0,core.height - (37 * 2),57 * 2, 37 * 2,voltage_sprite.getcoords(0, 0, 58, 38)),voltage_sprite.gettexture(),core);
-		resistance_loc = power_control.draw_text(new Vertex2d(5,60), "ohms  00000", 7);
-		power_loc = power_control.draw_text(new Vertex2d(5,50),"watts 00000",7);
-		voltage_loc = power_control.draw_text(new Vertex2d(15,20), "00000v", 7);
+		power_control = new GUI(new Vertex2d(0, core.height - (37 * 2), 57 * 2,
+				37 * 2), core.G.rectangle(0, core.height - (37 * 2), 57 * 2,
+				37 * 2, voltage_sprite.getcoords(0, 0, 58, 38)),
+				voltage_sprite.gettexture(), core);
+		resistance_loc = power_control.draw_text(new Vertex2d(5, 60),
+				"ohms  00000", 7);
+		power_loc = power_control.draw_text(new Vertex2d(5, 50), "watts 00000",
+				7);
+		voltage_loc = power_control
+				.draw_text(new Vertex2d(15, 20), "00000v", 7);
 		Method up = core.G.obtain_method(Inventory.class, "position_up");
 		Method down = core.G.obtain_method(Inventory.class, "position_down");
 		Method click1 = core.G.obtain_method(Inventory.class, "click1");
@@ -156,16 +162,22 @@ public class Game {
 				.add_item(new Gyroscope(new Vertex2d(0, 0), core, world), 1000);
 		inventory.add_item(new Cable_holder(null, core), 500);
 		inventory.add_item(new Cable(null, core), 500);
-		inventory.add_item(new Solar(new Vertex2d(0,0),core,world), 1000);
+		inventory.add_item(new Solar(new Vertex2d(0, 0), core, world), 1000);
 	}
 
 	public void init() {
 
 		ships = new shiphandler(core, 100);
-		Method voltage_up = core.G.obtain_method(Ship.class,"increase_voltage");
-		Method voltage_down = core.G.obtain_method(Ship.class, "decrease_voltage");
-		power_control.bind_button(new Vertex2d(16,core.height-60,26,10), false, new Encapsulated_method(voltage_down,null,ships.coreship));
-		power_control.bind_button(new Vertex2d(26,core.height-60,36,10), false, new Encapsulated_method(voltage_up,null,ships.coreship));
+		Method voltage_up = core.G
+				.obtain_method(Ship.class, "increase_voltage");
+		Method voltage_down = core.G.obtain_method(Ship.class,
+				"decrease_voltage");
+		power_control.bind_button(new Vertex2d(16, core.height - 60, 26, 10),
+				false, new Encapsulated_method(voltage_down, null,
+						ships.coreship));
+		power_control.bind_button(new Vertex2d(26, core.height - 60, 36, 10),
+				false,
+				new Encapsulated_method(voltage_up, null, ships.coreship));
 		world w = new world(core, 64, 64);
 		w.add_tile(new Wall(new Vertex2d(0, 0), core, w));
 		w.add_tile(new Wall(new Vertex2d(1, 0), core, w));
@@ -179,18 +191,21 @@ public class Game {
 		w.add_tile(new Wall(new Vertex2d(1, 2), core, w));
 		Ship s = new Ship(64, 64, core, w, ships);
 		s.set_position(new Vertex2d(0, 0));
-	//	ships.add_ship(s);
+		// ships.add_ship(s);
 	}
 
 	public void tick() {
-		
-		if(show_power){
+
+		if (show_power) {
 			power_control.tick();
 			power_control.set_instance(ships.coreship);
-			power_control.modify_text(resistance_loc,new Vertex2d(5,60), "ohms "+ships.coreship.get_resistance(), 7);
-			power_control.modify_text(power_loc,new Vertex2d(5,50),"watts "+ships.coreship.get_power(),7);
-			power_control.modify_text(voltage_loc,new Vertex2d(15,20), ""+ships.coreship.get_voltage()+"v", 7);
-		
+			power_control.modify_text(resistance_loc, new Vertex2d(5, 60),
+					"ohms " + ships.coreship.get_resistance(), 7);
+			power_control.modify_text(power_loc, new Vertex2d(5, 50), "watts "
+					+ ships.coreship.get_power(), 7);
+			power_control.modify_text(voltage_loc, new Vertex2d(15, 20), ""
+					+ ships.coreship.get_voltage() + "v", 7);
+
 		}
 		if (!core.ih.a && !core.ih.s && !core.ih.d && !core.ih.w) {
 			timeheld = 0;
@@ -268,27 +283,29 @@ public class Game {
 								}
 							}
 						} else if (world.get_tile(actual) != null) {
-							
-								if (inventory.take_selected(1)) {
 
-									Sub_Tile temp = world
-											.getnew((Sub_Tile) inventory.selected);
-									if (world.get_tile(actual).get_sub() == null) {
-										temp.init(core);
-										temp.set_super(world.get_tile(actual));
-										temp.set_dir(tile_dir);
-										if(!world.set_sub(temp, actual)){
-											inventory.add_item(inventory.selected, 1);
-										}
-									} else {
-										temp.init(core);
-										temp.set_super(world.get_tile(actual));
-										temp.set_dir(tile_dir);
-										if(!world.set_sub_sub(temp, actual)){
-											inventory.add_item(inventory.selected, 1);
-										}
+							if (inventory.take_selected(1)) {
+
+								Sub_Tile temp = world
+										.getnew((Sub_Tile) inventory.selected);
+								if (world.get_tile(actual).get_sub() == null) {
+									temp.init(core);
+									temp.set_super(world.get_tile(actual));
+									temp.set_dir(tile_dir);
+									if (!world.set_sub(temp, actual)) {
+										inventory.add_item(inventory.selected,
+												1);
 									}
-								
+								} else {
+									temp.init(core);
+									temp.set_super(world.get_tile(actual));
+									temp.set_dir(tile_dir);
+									if (!world.set_sub_sub(temp, actual)) {
+										inventory.add_item(inventory.selected,
+												1);
+									}
+								}
+
 							}
 
 						}
@@ -301,6 +318,9 @@ public class Game {
 						world.remove_tile(actual);
 
 					}
+				} else if (inventory.get_selectedposition() == 5) {
+					ships.coreship.crew_handler.get_crew(0).move_to_loc(
+							actual.whole().mult(32));
 				}
 			}
 		}
@@ -317,7 +337,7 @@ public class Game {
 
 				world.rotate(0);
 				ships.generate_ships(world.get_map(), world.mapwidth);
-				ships.coreship.crew_handler.get_crew(0).move_to_loc(new Vertex2d(32 * 5, 32  *2));
+
 			} else {
 				world.reset();
 				world.set_world(world);
@@ -355,10 +375,31 @@ public class Game {
 
 		}
 		inventory_gui.tick();
-		if (docked) {
+		
 			inventory.tick();
-		}
+		
 
+		if (!on_gui(core.ih.obtain_mouse()) && !docked) {
+
+			if (core.ih.mouse1) {
+
+				Vertex2d mousepos = core.ih.obtain_mouse();
+				Vertex2d actual = new Vertex2d(
+						(int) (((mousepos.x - (camera.x)) / (32))),
+						(int) ((mousepos.y - ((camera.y + 8))) / (32)));
+
+				if (mousepos.x - camera.x < 0 || mousepos.y - camera.y < 0) {
+					actual.x = -1;
+					actual.y = -1;
+				}
+
+				
+			    if (inventory.get_selectedposition() == 5) {
+					ships.coreship.crew_handler.get_crew(0).move_to_loc(
+							actual.whole().mult(32));
+				}
+			}
+		}
 	}
 
 	public void render() {
@@ -370,10 +411,10 @@ public class Game {
 			ships.render();
 		}
 		inventory_gui.render();
-		if (docked) {
+		
 			inventory.render();
-		}
-		if(show_power){
+		
+		if (show_power) {
 			power_control.render();
 		}
 

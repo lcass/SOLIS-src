@@ -25,6 +25,7 @@ public class Wall extends Tile {
 		spritepos = new Vertex2d(16,0,32,16);
 		this.core = core;
 		accepting = new int[]{3};
+		is_wall = true;
 
 	}
 	public void init(Core core){
@@ -33,6 +34,7 @@ public class Wall extends Tile {
 		spritepos = new Vertex2d(16,0,32,16);
 		this.position = new Vertex2d(0,0);
 		accepting = new int[]{3};
+		is_wall = true;
 	}
 	
 	public Vertex2d getsprite(

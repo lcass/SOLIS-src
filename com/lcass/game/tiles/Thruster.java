@@ -29,6 +29,7 @@ public class Thruster extends Tile{
 		electric = true;
 		consumer = true;
 		power = 10;
+		is_wall = true;
 	}
 	public void init(Core core){
 		this.core = core;
@@ -37,6 +38,7 @@ public class Thruster extends Tile{
 		electric = true;
 		consumer = true;
 		power = 10;
+		is_wall = true;
 	}
 	public void set_world(world world){
 		this.world = world;

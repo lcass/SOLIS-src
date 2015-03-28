@@ -23,6 +23,7 @@ public class Lattice extends Tile {
 		spritepos = com.lcass.util.Util.tex_coordinate(3, 1);
 		this.core = core;
 		accepting = new int[]{2};
+		is_wall = true;
 	}
 
 	public void init(Core core) {
@@ -30,6 +31,7 @@ public class Lattice extends Tile {
 		spritepos = com.lcass.util.Util.tex_coordinate(3, 1);
 		this.position = new Vertex2d(0, 0);
 		accepting = new int[]{2};
+		is_wall = true;
 	}
 
 	public Vertex2d getsprite() {

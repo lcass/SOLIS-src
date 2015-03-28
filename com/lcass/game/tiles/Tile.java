@@ -27,6 +27,7 @@ public abstract class Tile implements Serializable{
 	protected int type = 0;
 	protected int array_pos = 0;
 	private int ship = 0;
+	protected boolean is_wall = false;
 	protected int super_tile = 0;
 	private boolean supports_sub = false;
 	public Tile(){
@@ -231,6 +232,9 @@ public abstract class Tile implements Serializable{
 	}
 	public int get_super(){
 		return super_tile;
+	}
+	public boolean is_wall(){
+		return is_wall;
 	}
 	
 }

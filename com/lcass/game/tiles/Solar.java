@@ -25,6 +25,7 @@ public class Solar extends Tile{
 		electric = true;
 		supplier = true;
 		power = 10;
+		is_wall = true;
 
 	}
 	public void init(Core core){
@@ -34,6 +35,7 @@ public class Solar extends Tile{
 		electric = true;
 		supplier = true;
 		power = 10;
+		is_wall = true;
 	}
 	
 	public Vertex2d getsprite(
