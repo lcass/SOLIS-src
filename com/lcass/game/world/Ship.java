@@ -6,6 +6,7 @@ import com.lcass.core.Core;
 import com.lcass.entity.CrewHandler;
 import com.lcass.entity.Entity;
 import com.lcass.entity.Human;
+import com.lcass.entity.ProjectileHandler;
 import com.lcass.game.tiles.Tile;
 import com.lcass.game.world.resources.Resourcehandler;
 import com.lcass.graphics.Effect_builder;
@@ -13,6 +14,7 @@ import com.lcass.graphics.Particles;
 import com.lcass.graphics.TextGenerator;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
+import com.lcass.util.Progressive_buffer;
 
 public class Ship {
 	public world ship;
@@ -27,11 +29,13 @@ public class Ship {
 	private boolean last_left = false, last_right = false, last_up = false,
 			last_down = false;
 	private Vertex2d forwardstep, upstep, backstep, downstep;
-	private VBO position_string;
+	private VBO position_string, overlay;
+	private Progressive_buffer[] overlay_buffer = new Progressive_buffer[2];
 	public Tile[] map, edges;
 	public Vertex2d[] collision;
 	private shiphandler sh;
 	public float compound_rotation = 0;
+	public boolean overlay_reset = false;
 	private TextGenerator textgen;
 	private float rotation_offset = 0;
 	private int array_position = 0;
@@ -41,6 +45,7 @@ public class Ship {
 	private Particles particles;
 	private Resourcehandler resources;
 	public CrewHandler crew_handler;
+	public ProjectileHandler ph;
 	public Vertex2d absolute_position, position, BackCOM, ForeCOM, UpCOM,
 			DownCOM, COM, camera, forwardthrust, upthrust, downthrust,// position
 																		// is a
@@ -85,11 +90,17 @@ public class Ship {
 		this.sh = sh;
 		generate_edges();
 		resources = new Resourcehandler(this);
-		crew_handler = new CrewHandler(core,this);
-		Entity add = new Human(core,crew_handler);
-		add.set_position(new Vertex2d(16,16));
+		crew_handler = new CrewHandler(core, this);
+		Entity add = new Human(core, crew_handler);
+		add.set_position(new Vertex2d(16, 16));
 		crew_handler.add_crew(add);
-		
+		overlay_buffer[0] = new Progressive_buffer(null, false);
+		overlay_buffer[1] = new Progressive_buffer(null, true);
+		overlay = new VBO(core.G.mainvbo);
+		overlay.create(12 * 20);
+		overlay.bind_texture(core.crew_sprite.gettexture());
+		ph = new ProjectileHandler(core,w.ship);
+
 	}
 
 	public void damage(Vertex2d position, int damage) {
@@ -98,7 +109,11 @@ public class Ship {
 		if (map[coordinate] != null) {
 
 			if (map[coordinate].damage(damage)) {
+				if (map[coordinate].is_electric()) {
+					calculate_electronics();
+				}
 				remove_tile(position);
+
 				update();
 
 			}
@@ -373,11 +388,9 @@ public class Ship {
 		if (right) {
 			rotated = com.lcass.util.Util.rotate(COM, ForeCOM,
 					compound_rotation);
-			velocity_horiz += forwardstep.x
-					* (Math.abs(rotated.x - ForeCOM.x))
+			velocity_horiz += forwardstep.x * (Math.abs(rotated.x - ForeCOM.x))
 					* Math.cos(compound_rotation);// current velocity
-			velocity_vert += forwardstep.x
-					* (-Math.abs(rotated.y - ForeCOM.y))
+			velocity_vert += forwardstep.x * (-Math.abs(rotated.y - ForeCOM.y))
 					* Math.sin(compound_rotation);
 			Vertex2d temp = core.G.central_product(COM, forwardthrust);
 			position.u += forwardthrust.u * forwardstep.x * temp.y * temp.x;// multiply
@@ -394,11 +407,9 @@ public class Ship {
 		if (left) {
 			rotated = com.lcass.util.Util.rotate(COM, BackCOM,
 					compound_rotation);
-			velocity_horiz += backstep.x
-					* (-Math.abs(rotated.x - BackCOM.x) )
+			velocity_horiz += backstep.x * (-Math.abs(rotated.x - BackCOM.x))
 					* Math.cos(compound_rotation);// current velocity
-			velocity_vert += backstep.x
-					* ((Math.abs(rotated.y - BackCOM.y) ))
+			velocity_vert += backstep.x * ((Math.abs(rotated.y - BackCOM.y)))
 					* Math.sin(compound_rotation);// its not x and y they are
 													// just the
 			// positions in the vector
@@ -430,11 +441,9 @@ public class Ship {
 		if (down) {
 			rotated = com.lcass.util.Util.rotate(COM, DownCOM,
 					compound_rotation);
-			velocity_horiz += downstep.x
-					* (-Math.abs(rotated.x - DownCOM.x))
+			velocity_horiz += downstep.x * (-Math.abs(rotated.x - DownCOM.x))
 					* Math.sin(compound_rotation);// current velocity
-			velocity_vert += downstep.x
-					* (-Math.abs(rotated.y - DownCOM.y))
+			velocity_vert += downstep.x * (-Math.abs(rotated.y - DownCOM.y))
 					* Math.cos(compound_rotation);
 			Vertex2d temp = core.G.central_product(COM, downthrust);
 			position.u += downthrust.u * downstep.x * temp.y * temp.x;// multiply
@@ -638,13 +647,14 @@ public class Ship {
 	}
 
 	public void render() {
-		
+
 		ship.render();
 		position_string.render();
 		effects.render();
 		particles.render();
+		ph.render();
 		crew_handler.render();
-		
+		overlay.render();
 
 	}
 
@@ -736,11 +746,10 @@ public class Ship {
 	}
 
 	public Vertex2d rotpoint = new Vertex2d(0, 0, 0, 0);
-	public Vertex2d correct_pos = new Vertex2d(0,0,0,0);
+	public Vertex2d correct_pos = new Vertex2d(0, 0, 0, 0);
+
 	public void tick() {
-		
-		
-		
+		ph.tick();
 		resources.tick();
 		if (ship.hasdata) {
 			update_network();
@@ -766,8 +775,9 @@ public class Ship {
 		ship.set_rot_pos(rotpoint);
 
 		effects.set_rot_pos(rotpoint);
-
-		rotation += -(position.u /100);
+		overlay.rotate(compound_rotation);
+		overlay.set_position(camera);
+		rotation += -(position.u / 100);
 		compound_rotation = rotation + rotation_offset;
 
 		if (is_ai) {
@@ -779,15 +789,24 @@ public class Ship {
 			ship.tick();
 			effects.tick();
 		}
+		if (overlay_reset) {
+			overlay_reset = !overlay_reset;
+		}
 
+	}
+
+	public Vertex2d get_rot_pos() {
+		return rotpoint;
 	}
 
 	private boolean position_manual = false;
 
 	public void update_pos() {
+		
 		position_manual = true;
-		Vertex2d campos = core.G.convert_coordinates((int)(-camera.x + absolute_position.x),(int)(
-				-camera.y + absolute_position.y));
+		Vertex2d campos = core.G.convert_coordinates(
+				(int) (-camera.x + absolute_position.x),
+				(int) (-camera.y + absolute_position.y));
 		particles.translate(campos);
 		effects.transform(campos);
 		particles.tick();
@@ -953,7 +972,8 @@ public class Ship {
 		effects_generated = false;
 
 	}
-	public void update_movement(){
+
+	public void update_movement() {
 		calculate_masscentre();
 		calculate_COT();
 		calculate_steps();
@@ -1056,13 +1076,70 @@ public class Ship {
 	public float get_power() {
 		return resources.get_power();
 	}
-	public Tile get_tile(int position){
-		if(position >= 0){
-			if(position < map.length){
+
+	public Tile get_tile(int position) {
+		if (position >= 0) {
+			if (position < map.length) {
 				return map[position];
 			}
 		}
 		return null;
+	}
+
+	public world get_world() {
+		return this.ship;
+	}
+
+	public int to_position(Vertex2d data) {
+
+		return (int) (data.x + (data.y * ship.mapwidth));
+	}
+
+	public void clear_overlay() {
+		overlay.clear_data();
+		overlay_buffer[0].clear();
+		overlay_buffer[1].clear();
+		overlay_reset = true;
+	}
+
+	public void add_overlay(Progressive_buffer[] addition) {
+		overlay_buffer[0].extend(addition[0]);
+		overlay_buffer[1].extend(addition[1]);
+		overlay.edit_data(overlay_buffer);
+	}
+
+	public void overlay_update() {
+		clear_overlay();
+		for (int i = 0; i < map.length; i++) {
+			if (map[i] != null) {
+				if (map[i].selected()) {
+					add_overlay(core.G.square((int) map[i].get_pos().x * 32,
+							(int) (map[i].get_pos().y * 32) + 16, 32,
+							core.crew_sprite.getcoords(48, 0, 64, 16)));
+				}
+			}
+		}
+	}
+
+	public Tile[] get_weapons() {
+		Tile[] found = new Tile[map.length];
+		int found_pos = 0;
+		for (int i = 0; i < map.length; i++) {
+			if (map[i] != null) {
+				if (map[i].is_weapon()) {
+					found[found_pos] = map[i];
+					found_pos += 1;
+				}
+			}
+		}
+		Tile[] sized = new Tile[found_pos];
+		for (int i = 0; i < sized.length; i++) {
+			sized[i] = found[i];
+		}
+		return sized;
+	}
+	public void regen_world(){
+		ship.regen();
 	}
 
 }

@@ -3,21 +3,27 @@ package com.lcass.game;
 import java.lang.reflect.Method;
 
 import com.lcass.core.Core;
+import com.lcass.entity.Entity;
 import com.lcass.game.tiles.Cable;
 import com.lcass.game.tiles.Cable_holder;
 import com.lcass.game.tiles.Corner;
 import com.lcass.game.tiles.Floor;
+import com.lcass.game.tiles.Frame;
 import com.lcass.game.tiles.Gyroscope;
 import com.lcass.game.tiles.Lattice;
+import com.lcass.game.tiles.Machine_gun;
 import com.lcass.game.tiles.Solar;
 import com.lcass.game.tiles.Sub_Tile;
 import com.lcass.game.tiles.Thruster;
 import com.lcass.game.tiles.Tile;
+import com.lcass.game.tiles.Vaultdoor;
+import com.lcass.game.tiles.Vaultwall;
 import com.lcass.game.tiles.Wall;
 import com.lcass.game.world.Ship;
 import com.lcass.game.world.shiphandler;
 import com.lcass.game.world.world;
 import com.lcass.graphics.GUI;
+import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
 import com.lcass.graphics.texture.spritesheet;
 import com.lcass.util.Encapsulated_method;
@@ -35,11 +41,20 @@ public class Game {
 	private boolean show_power = true;
 	private int resistance_loc, voltage_loc, power_loc = 0;
 	public shiphandler ships;
+	private Vertex2d currently_selected = new Vertex2d(-1, -1);
 	private int tile_dir = 0;
+	private Entity selected_entity;
+	private VBO mouse_square;
+	private spritesheet mouse_sprite = new spritesheet("textures/selected.png");
 
 	public Game(world world, Core core) {
 		this.world = world;
 		this.core = core;
+		mouse_square = new VBO(core.G.mainvbo);
+		mouse_square.create(12);
+		mouse_square.bind_texture(mouse_sprite.gettexture());
+		mouse_square.edit_data(core.G.square(0, 0, 32,
+				mouse_sprite.getcoords(0, 0, 16, 16)));
 		spritesheet player = new spritesheet("textures/inventory.png");
 		spritesheet voltage_sprite = new spritesheet("textures/playerGUI.png");
 		inventory_gui = new GUI(new Vertex2d(core.width - (82 * 2), core.height
@@ -153,6 +168,10 @@ public class Game {
 		inventory_gui.bind_button(new Vertex2d(core.width - 42, core.height
 				- (48 + (38 * 14)), 132, 32), false, new Encapsulated_method(
 				click15, null, inventory));
+		inventory
+				.add_item(new Vaultdoor(new Vertex2d(0, 0), core, world), 1000);
+		inventory
+				.add_item(new Vaultwall(new Vertex2d(0, 0), core, world), 1000);
 		inventory.add_item(new Wall(new Vertex2d(0, 0), core, world), 1000);
 		inventory.add_item(new Thruster(new Vertex2d(0, 0), core, world), 1000);
 		inventory.add_item(new Corner(null, core), 500);
@@ -163,6 +182,9 @@ public class Game {
 		inventory.add_item(new Cable_holder(null, core), 500);
 		inventory.add_item(new Cable(null, core), 500);
 		inventory.add_item(new Solar(new Vertex2d(0, 0), core, world), 1000);
+		inventory.add_item(new Frame(new Vertex2d(0, 0), core, world), 100);
+		inventory.add_item(new Machine_gun(new Vertex2d(0, 0), core, world),
+				100);
 	}
 
 	public void init() {
@@ -178,7 +200,7 @@ public class Game {
 		power_control.bind_button(new Vertex2d(26, core.height - 60, 36, 10),
 				false,
 				new Encapsulated_method(voltage_up, null, ships.coreship));
-		world w = new world(core, 64, 64);
+		world w = new world(core, 64, 64,-2);
 		w.add_tile(new Wall(new Vertex2d(0, 0), core, w));
 		w.add_tile(new Wall(new Vertex2d(1, 0), core, w));
 		w.add_tile(new Wall(new Vertex2d(2, 0), core, w));
@@ -191,7 +213,7 @@ public class Game {
 		w.add_tile(new Wall(new Vertex2d(1, 2), core, w));
 		Ship s = new Ship(64, 64, core, w, ships);
 		s.set_position(new Vertex2d(0, 0));
-		// ships.add_ship(s);
+	    ships.add_ship(s);
 	}
 
 	public void tick() {
@@ -235,16 +257,14 @@ public class Game {
 				camera.y -= step + (step * timeheld);
 			}
 		}
-
+		Vertex2d mousepos = core.ih.obtain_mouse();
+		Vertex2d actual = new Vertex2d(
+				(int) (((mousepos.x - (camera.x)) / (32))),
+				(int) ((mousepos.y - ((camera.y + 8))) / (32)));
 		// placing handling
 		if (!on_gui(core.ih.obtain_mouse()) && docked) {
 
 			if (core.ih.mouse1) {
-
-				Vertex2d mousepos = core.ih.obtain_mouse();
-				Vertex2d actual = new Vertex2d(
-						(int) (((mousepos.x - (camera.x)) / (32))),
-						(int) ((mousepos.y - ((camera.y + 8))) / (32)));
 
 				if (mousepos.x - camera.x < 0 || mousepos.y - camera.y < 0) {
 					actual.x = -1;
@@ -337,11 +357,15 @@ public class Game {
 
 				world.rotate(0);
 				ships.generate_ships(world.get_map(), world.mapwidth);
+				inventory.set_weapon(true);
+				update_weps();
 
 			} else {
+				world = ships.coreship.get_world();
 				world.reset();
 				world.set_world(world);
 				world.rotate(0);
+				inventory.set_weapon(false);
 			}
 			docked = !docked;
 			tile_dir = 0;
@@ -375,31 +399,195 @@ public class Game {
 
 		}
 		inventory_gui.tick();
-		
-			inventory.tick();
-		
+
+		inventory.tick();
 
 		if (!on_gui(core.ih.obtain_mouse()) && !docked) {
 
 			if (core.ih.mouse1) {
 
-				Vertex2d mousepos = core.ih.obtain_mouse();
-				Vertex2d actual = new Vertex2d(
-						(int) (((mousepos.x - (camera.x)) / (32))),
-						(int) ((mousepos.y - ((camera.y + 8))) / (32)));
+				if (mousepos.x - camera.x < 0 || mousepos.y - camera.y < 0) {
+					actual.x = -1;
+					actual.y = -1;
+				}
+				if (inventory.get_selectedposition() == 4) {
+					if (selected_entity != null) {
+						Vertex2d check = ships.coreship.get_world().null_check(
+								ships.coreship.to_position(actual));
+						boolean found = false;
+						int tile_pos = ships.coreship.to_position(actual);
+						if (check.x != -1) {
+							found = true;
+							selected_entity.move_to_loc(actual.whole()
+									.sub(new Vertex2d(1, 0, 0, 0)).mult(32));
+							selected_entity.set_target(tile_pos);
+							Tile temp = new Frame(actual, core,
+									ships.coreship.ship);
+							temp.setpos((int) actual.x, (int) actual.y);
+							temp.set_final(inventory.selected);
+							selected_entity.set_frame(temp);
+						}
+						if (check.y != -1 && !found) {
+							found = true;
+							selected_entity.move_to_loc(actual.whole()
+									.sub(new Vertex2d(-1, 0, 0, 0)).mult(32));
+							selected_entity.set_target(tile_pos);
+							Tile temp = new Frame(actual, core,
+									ships.coreship.ship);
+							temp.set_final(inventory.selected);
+							temp.setpos((int) actual.x, (int) actual.y);
+							selected_entity.set_frame(temp);
+						}
+						if (check.u != -1 && !found) {
+							found = true;
+							selected_entity.move_to_loc(actual.whole()
+									.sub(new Vertex2d(0, 1, 0, 0)).mult(32));
+							selected_entity.set_target(tile_pos);
+							Tile temp = new Frame(actual, core,
+									ships.coreship.ship);
+							temp.set_final(inventory.selected);
+							temp.setpos((int) actual.x, (int) actual.y);
+							selected_entity.set_frame(temp);
+						}
+						if (check.v != -1 && !found) {
+							found = true;
+							selected_entity.move_to_loc(actual.whole()
+									.sub(new Vertex2d(0, -1, 0, 0)).mult(32));
+							selected_entity.set_target(tile_pos);
+							Tile temp = new Frame(actual, core,
+									ships.coreship.ship);
+							temp.set_final(inventory.selected);
+							temp.setpos((int) actual.x, (int) actual.y);
+							selected_entity.set_frame(temp);
+						}
+					}
+				}
+
+				if (inventory.get_selectedposition() == 5) {
+					if (ships.coreship.crew_handler.get_crew(actual) == null
+							&& selected_entity != null) {
+						selected_entity.set_selected(false);
+					}
+					selected_entity = ships.coreship.crew_handler
+							.get_crew(actual);
+					if (selected_entity != null) {
+						if (currently_selected.x != -1
+								&& currently_selected.x != -2) {
+							ships.get_ship((int) currently_selected.x).map[(int) currently_selected.y]
+									.set_selected(false);
+						} else if (currently_selected.x == -2) {
+							ships.coreship.map[(int) currently_selected.y]
+									.set_selected(false);
+						}
+						if (currently_selected.x != -1) {
+							if (currently_selected.x != -2) {
+								ships.get_ship((int) currently_selected.x)
+										.overlay_update();
+							} else {
+								ships.coreship.overlay_update();
+							}
+						}
+						currently_selected = new Vertex2d(-1, -1);
+
+						selected_entity.set_selected(true);
+					}
+					if (selected_entity == null) {
+
+						Vertex2d tile = ships.get_ship_at(actual);
+
+						if (tile != null) {
+
+							if (currently_selected.x != -1
+									&& currently_selected.x != -2) {
+								ships.get_ship((int) currently_selected.x).map[(int) currently_selected.y]
+										.set_selected(false);
+							} else if (currently_selected.x == -2) {
+								ships.coreship.map[(int) currently_selected.y]
+										.set_selected(false);
+							}
+							if (tile.x != -2) {
+								if (ships.get_ship((int) tile.x).map[(int) tile.y]
+										.selectable()) {
+									ships.get_ship((int) tile.x).map[(int) tile.y]
+											.set_selected(true);
+								}
+							} else {
+								if (ships.coreship.map[(int) tile.y]
+										.selectable()) {
+									ships.coreship.map[(int) tile.y]
+											.set_selected(true);
+								}
+
+							}
+							currently_selected = tile;
+							if (tile.x != -1) {
+								if (tile.x != -2) {
+									ships.get_ship((int) tile.x)
+											.overlay_update();
+								} else {
+									ships.coreship.overlay_update();
+								}
+							}
+
+						} else if (currently_selected.x != -1
+								&& currently_selected.x != -2) {
+
+							ships.get_ship((int) currently_selected.x).map[(int) currently_selected.y]
+									.set_selected(false);
+							currently_selected = new Vertex2d(-1, -1);
+						} else if (currently_selected.x == -2) {
+							ships.coreship.map[(int) currently_selected.y]
+									.set_selected(false);
+						}
+					}
+				}
+
+			}
+			if (core.ih.mouse2) {
+				if (inventory.get_selectedposition() == 5) {
+					if (selected_entity != null) {
+						selected_entity.move_to_loc(actual.whole().mult(32));
+					}
+
+				}
+			}
+		}
+		if (!on_gui(core.ih.obtain_mouse())) {
+			Vertex2d draw_pos = mousepos.whole().sub(new Vertex2d(0, 8))
+					.sub(new Vertex2d(camera.x % 32, camera.y % 32)).div(32)
+					.to_int().mult(32);
+			mouse_square.set_position(core.G.convert_coordinates(draw_pos
+					.whole()
+					.add(new Vertex2d((camera.x % 32), (camera.y % 32) + 16))));
+		}
+		if (!on_gui(core.ih.obtain_mouse()) && !docked) {
+
+			if (core.ih.mouse1) {
 
 				if (mousepos.x - camera.x < 0 || mousepos.y - camera.y < 0) {
 					actual.x = -1;
 					actual.y = -1;
 				}
 
-				
-			    if (inventory.get_selectedposition() == 5) {
-					ships.coreship.crew_handler.get_crew(0).move_to_loc(
-							actual.whole().mult(32));
+				if (!world.within_map(actual)) {
+
+				} else if (inventory.get_selectedposition() == 4) {
+					weaponset weapons = inventory.wep_storage[inventory.get_selected_wep()];
+					if(weapons.type != null ){
+						Tile[] shootable = weapons.weapons;
+						for(int i = 0 ; i < shootable.length;i++){
+							if(shootable[i]  != null){
+								Vertex2d move = ships.coreship.ph.calc_step(shootable[i].get_world_pos(),actual.whole().mult(32));
+							
+								ships.coreship.ship.get_tile(shootable[i].get_pos()).set_movement(move);
+								ships.coreship.ship.get_tile(shootable[i].get_pos()).fire();
+							}
+						}
+					}
 				}
 			}
 		}
+
 	}
 
 	public void render() {
@@ -411,12 +599,13 @@ public class Game {
 			ships.render();
 		}
 		inventory_gui.render();
-		
-			inventory.render();
-		
+
+		inventory.render();
+
 		if (show_power) {
 			power_control.render();
 		}
+		mouse_square.render();
 
 	}
 
@@ -455,5 +644,12 @@ public class Game {
 		}
 		ships.move_core(leftr, rightr, left, right, up, down);
 
+	}
+
+	public void update_weps() {
+		Tile[] weapons = ships.coreship.get_weapons();
+		for (int i = 0; i < weapons.length; i++) {
+			inventory.add_weapon(weapons[i]);
+		}
 	}
 }

@@ -3,6 +3,7 @@ package com.lcass.game.world;
 import java.util.ArrayList;
 
 import com.lcass.core.Core;
+import com.lcass.entity.Projectile;
 import com.lcass.game.tiles.Tile;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
@@ -23,8 +24,8 @@ public class shiphandler {
 		v = new VBO(core.G.mainvbo);
 		v.bind_texture(core.effect_sprite.gettexture());
 		v.create(50 * 12);
-		coreship = new Ship(64,64,core,new world(core,64,64),this);
-		
+		coreship = new Ship(64, 64, core, new world(core, 64, 64, -2), this);
+
 	}
 
 	public void set_core_ship(Ship core) {
@@ -48,8 +49,10 @@ public class shiphandler {
 	}
 
 	public Ship get_ship(int pos) {
-		if (pos <= world_ships.length) {
+		if (pos <= world_ships.length && pos != -2) {
 			return world_ships[pos];
+		} else if (pos == -2) {
+			return coreship;
 		}
 		return null;
 	}
@@ -68,7 +71,17 @@ public class shiphandler {
 		}
 		return false;
 	}
+
+	public boolean check_collision(Projectile a, Ship b) {
+		if (Math.abs(a.get_abs().x - b.absolute_position.x) < 2000
+				&& Math.abs(a.get_abs().y - b.absolute_position.y) < 2000) {
+			return true;
+		}
+		return false;
+	}
+
 	private int start = 0;
+
 	public void check_ship_collision(Ship a) {
 		if (a == null) {
 			return;
@@ -78,20 +91,29 @@ public class shiphandler {
 			if (a != world_ships[i] && world_ships[i] != null) {
 				if (check_collision(a, world_ships[i])) {
 					Ship attacking = world_ships[i];
-					for(int ax =0;ax< a.collision.length;ax++){
+					for (int ax = 0; ax < a.collision.length; ax++) {
 						Vertex2d corner = a.collision[ax].whole();
-						corner.add2(core.G.revert_coordinates(a.absolute_position.xy()));
-						
-						for(int at = 0;at < attacking.collision.length;at++){
+						corner.add2(core.G
+								.revert_coordinates(a.absolute_position.xy()));
+
+						for (int at = 0; at < attacking.collision.length; at++) {
 							Vertex2d attacker = attacking.collision[at].whole();
-							attacker.add2(core.G.revert_coordinates(attacking.absolute_position));
-							
-							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.rotation);
-							if(((attacker.x > corner.x) && (attacker.x < corner.u))|| ((attacker.u > corner.x) && (attacker.u < corner.u))){
-								if(((attacker.y > corner.y) && (attacker.y < corner.v))|| ((attacker.v > corner.y) && (attacker.v < corner.v))){
-									corner.sub2(core.G.revert_coordinates(a.absolute_position.xy()));
+							attacker.add2(core.G
+									.revert_coordinates(attacking.absolute_position));
+
+							attacker = com.lcass.util.Util.rotate(attacker,
+									a.rotpoint, -a.rotation);
+							if (((attacker.x > corner.x) && (attacker.x < corner.u))
+									|| ((attacker.u > corner.x) && (attacker.u < corner.u))) {
+								if (((attacker.y > corner.y) && (attacker.y < corner.v))
+										|| ((attacker.v > corner.y) && (attacker.v < corner.v))) {
+									corner.sub2(core.G
+											.revert_coordinates(a.absolute_position
+													.xy()));
 									corner.div(32);
-									attacker.sub2(core.G.revert_coordinates(attacking.absolute_position.xy()));
+									attacker.sub2(core.G
+											.revert_coordinates(attacking.absolute_position
+													.xy()));
 									attacker.div(32);
 									a.damage(a.edges[ax].get_pos(), 100);
 									attacking.damage(attacker, 100);
@@ -107,35 +129,116 @@ public class shiphandler {
 			if (a != coreship) {
 				if (check_collision(a, coreship)) {
 					Ship attacking = coreship;
-					for(int ax =0;ax< a.collision.length;ax++){
+					for (int ax = 0; ax < a.collision.length; ax++) {
 						Vertex2d corner = a.collision[ax].whole();
-						corner.add2(core.G.revert_coordinates(a.absolute_position.xy()));
-						corner.sub(new Vertex2d(32,0,0,0));
-						for(int at = 0;at < attacking.collision.length;at++){
+						corner.add2(core.G
+								.revert_coordinates(a.absolute_position.xy()));
+						corner.sub(new Vertex2d(32, 0, 0, 0));
+						for (int at = 0; at < attacking.collision.length; at++) {
 							Vertex2d attacker = attacking.collision[at].whole();
-							attacker = com.lcass.util.Util.rotate(attacker, attacking.rotpoint, -attacking.compound_rotation);					
-							attacker = com.lcass.util.Util.rotate(attacker, a.rotpoint, -a.compound_rotation);
-							attacker.add2(core.G.revert_coordinates(attacking.absolute_position.xy()));
-									
-							if(((attacker.x >= corner.x) && (attacker.x <= corner.u))|| ((attacker.u >= corner.x) && (attacker.u <= corner.u))){
-								
-								if(((attacker.y >= corner.y) && (attacker.y <= corner.v))|| ((attacker.v >= corner.y) && (attacker.v <= corner.v))){
-									corner.sub2(core.G.revert_coordinates(a.absolute_position.xy()));
+							attacker = com.lcass.util.Util.rotate(attacker,
+									attacking.rotpoint,
+									-attacking.compound_rotation);
+							attacker = com.lcass.util.Util.rotate(attacker,
+									a.rotpoint, -a.compound_rotation);
+							attacker.add2(core.G
+									.revert_coordinates(attacking.absolute_position
+											.xy()));
+
+							if (((attacker.x >= corner.x) && (attacker.x <= corner.u))
+									|| ((attacker.u >= corner.x) && (attacker.u <= corner.u))) {
+
+								if (((attacker.y >= corner.y) && (attacker.y <= corner.v))
+										|| ((attacker.v >= corner.y) && (attacker.v <= corner.v))) {
+									corner.sub2(core.G
+											.revert_coordinates(a.absolute_position
+													.xy()));
 									corner.div(32);
-									attacker.sub2(core.G.revert_coordinates(attacking.absolute_position.xy()));
+									attacker.sub2(core.G
+											.revert_coordinates(attacking.absolute_position
+													.xy()));
 									attacker.div(32);
 									a.damage(a.edges[ax].get_pos(), 100);
-									attacking.damage(attacking.edges[at].get_pos(), 100);
-									
+									attacking.damage(
+											attacking.edges[at].get_pos(), 100);
+
 								}
 							}
 						}
 					}
 				}
-				
+
 			}
 		}
-		start+=1;
+		start += 1;
+	}
+
+	public void proj_collision_check(Projectile P) {
+		for (int i = 0; i < world_ships.length; i++) {
+			if(i == P.get_ship()){
+				continue;
+			}
+			if (world_ships[i] != null) {
+				
+				if (check_collision(P, world_ships[i])) {
+					Ship attacking = world_ships[i];
+
+					Vertex2d corner = P.get_abs();
+					corner = com.lcass.util.Util.rotate(corner,
+							attacking.rotpoint, attacking.rotation);
+					for (int at = 0; at < attacking.collision.length; at++) {
+						Vertex2d attacker = attacking.collision[at].whole();
+						attacker.add2(core.G
+								.revert_coordinates(attacking.absolute_position));
+						
+						if (((corner.x >= attacker.x) && (corner.x <= attacker.u))) {
+							
+							if (((corner.y >= attacker.y) && (corner.y <= attacker.v))
+									) {
+								
+								attacker.sub2(core.G
+										.revert_coordinates(attacking.absolute_position
+												.xy()));
+								attacker.div(32);
+								P.Destroy();
+								attacking.damage(attacker, 100);
+							}
+						}
+					}
+				}
+
+			}
+		}
+		if (coreship != null && P.get_ship() != -2) {
+			if (check_collision(P, coreship)) {
+				Ship attacking = coreship;
+
+				Vertex2d corner = P.get_abs();
+				corner = com.lcass.util.Util.rotate(corner,
+						attacking.rotpoint, attacking.rotation);
+				for (int at = 0; at < attacking.collision.length; at++) {
+					Vertex2d attacker = attacking.collision[at].whole();
+					attacker.add2(core.G
+							.revert_coordinates(attacking.absolute_position));
+				
+					if (((corner.x >= attacker.x) && (corner.x <= attacker.u))) {
+						
+						if (((corner.y >= attacker.y) && (corner.y <= attacker.v))
+								) {
+						
+							attacker.sub2(core.G
+									.revert_coordinates(attacking.absolute_position
+											.xy()));
+							attacker.div(32);
+							P.Destroy();
+							attacking.damage(attacker, 100);
+						}
+					}
+			 }
+			
+
+		}
+		}
 	}
 
 	public void tick() {
@@ -150,7 +253,8 @@ public class shiphandler {
 				if (coreship != null) {
 					world_ships[i].bind_camera(new Vertex2d(
 							-(coreship.absolute_position.x - campos.x),
-							-(coreship.absolute_position.y - campos.y)).add(world_ships[i].absolute_position));
+							-(coreship.absolute_position.y - campos.y))
+							.add(world_ships[i].absolute_position));
 
 				}
 				world_ships[i].tick();
@@ -248,7 +352,9 @@ public class shiphandler {
 
 				Object[] temp = tiles_list.get((i) - start_curr).toArray();
 				Tile[] data = com.lcass.util.Util.cast_tile(temp);
-				coreship = new Ship(64,64,core,new world(core,64,64,data),this);
+				coreship = new Ship(64, 64, core, new world(core, 64, 64, data,
+						-2), this);
+				coreship.regen_world();
 				break;
 			}
 		}
@@ -336,5 +442,43 @@ public class shiphandler {
 				world_ships[i].cleanup();
 			}
 		}
+	}
+
+	public Vertex2d get_ship_at(Vertex2d position) {
+		Vertex2d adjusted_pos = position.whole();
+		if (coreship != null) {
+			Tile[] map = coreship.map;
+			for (int j = 0; j < map.length; j++) {
+				if (map[j] != null) {
+					Vertex2d adjusted = map[j].get_pos().whole()
+							.add(coreship.correct_pos);
+
+					if (adjusted_pos.x == adjusted.x
+							&& adjusted_pos.y == adjusted.y) {
+
+						return new Vertex2d(-2, j);
+					}
+				}
+			}
+		}
+		for (int i = 0; i < world_ships.length; i++) {
+
+			if (world_ships[i] != null) {
+				Tile[] map = world_ships[i].map;
+				for (int j = 0; j < map.length; j++) {
+					if (map[j] != null) {
+						Vertex2d adjusted = map[j].get_pos().whole()
+								.add(world_ships[i].correct_pos).div(32)
+								.to_int();
+						System.out.println(adjusted_pos.x);
+						if (adjusted_pos.x == adjusted.x
+								&& adjusted_pos.y == adjusted.y) {
+							return new Vertex2d(i, j);
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 }

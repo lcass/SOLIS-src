@@ -1,11 +1,11 @@
 package com.lcass.game.world;
 
 import com.lcass.core.Core;
+import com.lcass.entity.Bullet;
 import com.lcass.game.tiles.Sub_Tile;
 import com.lcass.game.tiles.Tile;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
-import com.lcass.graphics.texture.spritesheet;
 import com.lcass.util.Progressive_buffer;
 
 public class world {
@@ -25,11 +25,12 @@ public class world {
 	public Vertex2d camera = new Vertex2d(0, 0, 0, 0);
 	private Tile[] tilemap;
 	private VBO drawdata;
+	
 
 	public boolean hasdata = false;
 	private Core core;
-
-	public world(Core core, int width, int height) {
+	public int ship;
+	public world(Core core, int width, int height,int ship) {
 		this.core = core;
 		tilemap = new Tile[width * height];
 		this.mapwidth = width;
@@ -40,9 +41,12 @@ public class world {
 		drawdata.create(width * height * 12 * 2);
 		drawdata.bind_texture(core.tile_sprite.gettexture());
 		create_images();
+		this.ship = ship;
+		
+		
 	}
 
-	public world(Core core, int width, int height, Tile[] tiles) {
+	public world(Core core, int width, int height, Tile[] tiles,int ship) {
 		this.core = core;
 		tilemap = new Tile[width * height];
 		this.mapwidth = width;
@@ -60,6 +64,7 @@ public class world {
 				add_tile(tiles[i]);
 			}
 		}
+		this.ship= ship;
 
 	}
 
@@ -73,6 +78,7 @@ public class world {
 			vCOTu.render();
 			vCOTd.render();
 		}
+		
 	}
 
 	public void add_tile(Tile t) {// should be passed as a
@@ -86,6 +92,7 @@ public class world {
 			tilemap[coordinate] = t;
 			tilemap[coordinate].set_world(this);
 			tilemap[coordinate].bind();
+			tilemap[coordinate].set_ship(ship);
 			tilemap[coordinate].setpos((int)pos.x,(int)pos.y);
 			tilemap[coordinate].set_array_pos(coordinate);
 			if (render_COM) {
@@ -108,6 +115,7 @@ public class world {
 			t.set_index(index);
 			tilemap[coordinate] = t;
 			tilemap[coordinate].bind_index();
+			tilemap[coordinate].set_ship(ship);
 			tilemap[coordinate].setpos((int)pos.x,(int)pos.y);
 			tilemap[coordinate].set_array_pos(coordinate);
 			if (render_COM) {
@@ -475,7 +483,7 @@ public class world {
 	}
 
 	public void tick() {
-
+		
 		drawdata.set_position(camera);
 		if (render_COM) {
 			if (COM != null) {
@@ -574,6 +582,47 @@ public class world {
 		tilemap = new Tile[64 * 64];
 		for(int i = 0;i < t.length;i++){
 			tilemap[i] = t[i];
+		}
+	}
+	public Vertex2d null_check(int pos) {
+
+		Vertex2d poses = new Vertex2d(-1, -1, -1, -1);
+
+		if (pos > 0) {
+			if (tilemap[pos - 1] != null) {
+				if(!tilemap[pos - 1].is_wall()){
+					poses.set_x(pos - 1);
+			}
+			}
+		}
+		if (pos < tilemap.length) {
+			if (tilemap[pos + 1] != null) {
+				if(!tilemap[pos + 1].is_wall()){
+					poses.set_y(pos + 1);
+				}
+			}
+		}
+		if (pos > mapwidth) {
+			if (tilemap[pos - mapwidth] != null) {
+				if(!tilemap[pos - mapwidth].is_wall()){
+					poses.set_u(pos - mapwidth);
+				}
+			}
+		}
+		if (pos < tilemap.length - mapwidth) {
+			if (tilemap[pos + mapwidth] != null) {
+				if(!tilemap[pos + mapwidth].is_wall()){
+					poses.set_v(pos +mapwidth);
+				}
+			}
+		}
+		return poses;
+	}
+	public void regen(){
+		for(int i = 0; i < tilemap.length;i++){
+			if(tilemap[i] != null){
+			tilemap[i].set_ship(ship);
+			}
 		}
 	}
 }

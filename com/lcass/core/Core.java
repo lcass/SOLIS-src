@@ -27,12 +27,13 @@ public class Core{
 	public spritesheet effect_sprite,particle_sprite;
 	public spritesheet crew_sprite;
 	public spritesheet tile_sprite;
+	public spritesheet proj_sprite;
 	public Core(){
 		G = new graphics(this);
-		G.create_display(width, height, "SOLIS", 120, 60);
+		G.create_display(width, height, "SOLIS", 4000, 60);
 		
 		ih = new InputHandler(this);
-		crew_sprite = new spritesheet("textures/blocksprites.png");
+		crew_sprite = new spritesheet("textures/Entities.png");
 		//bind close function
 		Method close = G.obtain_method(this.getClass(), "cleanup");
 		G.bind_close_function(close);
@@ -44,7 +45,8 @@ public class Core{
 		background_sprite = new spritesheet("textures/planet.png");
 		effect_sprite = new spritesheet("textures/effects.png");
 		particle_sprite = new spritesheet("textures/particles.png");
-		game = new Game(new world(this,64,64),this);
+		proj_sprite = new spritesheet("textures/projectiles.png");
+		game = new Game(new world(this,64,64 , -2),this);
 		//bind resize method
 		Method resize = G.obtain_method(this.getClass(), "resize");
 		G.bind_resize_method(resize);

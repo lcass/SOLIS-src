@@ -1,9 +1,10 @@
 package com.lcass.game.tiles;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import com.lcass.core.Core;
-import com.lcass.game.world.Ship;
+import com.lcass.game.Items.Item;
 import com.lcass.game.world.world;
 import com.lcass.graphics.Vertex2d;
 
@@ -12,21 +13,29 @@ public abstract class Tile implements Serializable{
 	protected Core core;
 	protected world world;
 	protected Sub_Tile sub_tile;
+	protected boolean is_weapon = false;
 	protected boolean supplied = true;
 	protected boolean electric = false;
 	protected boolean cable = false;
 	protected boolean supplier = false;
 	protected boolean consumer = false;
+	protected boolean selectable = false;
+	protected boolean selected = false;
+	protected int dir = 0;
+	protected int index = 0;
 	protected boolean active = true;
 	public String name = "empty";
 	protected int[] accepting = new int[0];
 	protected int power = 0;
-	private int mass = 0;
+	protected int mass = 0;
 	protected int netnum = 0;
 	protected float resistance = 0;
 	protected int type = 0;
+	protected Item[] required = new Item[0];
+	protected ArrayList<Item> stored = new ArrayList<Item>();
+	protected Tile final_tile = null;
 	protected int array_pos = 0;
-	private int ship = 0;
+	protected int ship = 0;
 	protected boolean is_wall = false;
 	protected int super_tile = 0;
 	private boolean supports_sub = false;
@@ -54,6 +63,11 @@ public abstract class Tile implements Serializable{
 		this.core = core;
 		spritepos = new Vertex2d(0,0,16,16);
 		this.position = new Vertex2d(0,0);
+	}
+	public void init(Core core , world world){
+		init(core);
+		this.world = world;
+		
 	}
 	public Vertex2d get_pos(){
 		return position;
@@ -85,18 +99,19 @@ public abstract class Tile implements Serializable{
 		
 	}
 	public void set_index(int index){
-		
+		this.index = index;
 	}
 	public String get_name(){
 		return this.name;
 	}
 	public int get_index(){
-		return 0;
+		return index;
 	}
 	public void set_dir(int dir){
-		
+		this.dir = dir;
 	}
 	public void set_ship(int ship){
+		System.out.println(ship);
 		this.ship = ship;
 	}
 	public int get_ship(){
@@ -236,5 +251,52 @@ public abstract class Tile implements Serializable{
 	public boolean is_wall(){
 		return is_wall;
 	}
+	public void set_final(Tile t){
+		this.final_tile = t;
+	}
+	public Tile get_final(){
+		return this.final_tile;
+	}
+	public void set_resources(Item[] i){
+		required = i;
+	}
+	public void set_stored_resources(Item[] i){
+		for(int j = 0;  j < i.length;j++){
+			stored.add(i[j]);
+		}
+	}
+	public void add_resources(Item i){
+		stored.add(i);
+	}
+	public Item[] get_required_resources(){
+		return required;
+	}
+	public boolean selectable(){
+		return this.selectable;
+	}
+	public boolean selected(){
+		return this.selected;
+	}
+	public void set_selected(boolean i){
+		selected = i;
+	}
+	public boolean is_weapon(){
+		return this.is_weapon;
+	}
+	public Vertex2d get_world_pos(){
+		if(core.game.ships.get_ship(ship)!= null){
+			Vertex2d pos = core.game.ships.get_ship(ship).correct_pos.whole().add(position.whole().mult(32));
+			
+			return pos;
+		}
+		return new Vertex2d(0,0,0,0);
+	}
+	public void fire(){
+		
+	}
+	public void set_movement(Vertex2d mov){
+		
+	}
+	
 	
 }

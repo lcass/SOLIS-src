@@ -10,7 +10,7 @@ public class Wall extends Tile {
 	private Core core;
 	
 	private world world;
-	private int index;
+	//private int index;
 
 	public String name = "wall";
 	private int ship = 0;

@@ -123,6 +123,7 @@ public class Effect_builder {
 
 	}
 
+
 	public void render() {
 
 		draw_data.render();

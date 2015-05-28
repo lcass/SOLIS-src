@@ -1,6 +1,16 @@
 package com.lcass.graphics.texture;
 
 public class spritecomponent {
+	public spritecomponent(){
+		
+	}
+	public spritecomponent(float x, float y, float ex, float ey , Texture t){
+		this.x = x;
+		this.y = y;
+		this.ex = ex;
+		this.ey = ey;
+		this.t = t;
+	}
 	public void set(float x, float y, float ex, float ey,Texture t){
 		this.x = x;
 		this.y = y;

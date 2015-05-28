@@ -3,6 +3,7 @@ package com.lcass.entity;
 import java.util.ArrayList;
 
 import com.lcass.core.Core;
+import com.lcass.game.Items.Item;
 import com.lcass.game.tiles.Tile;
 import com.lcass.game.world.shiphandler;
 import com.lcass.graphics.Vertex2d;
@@ -19,11 +20,20 @@ public abstract class Entity {
 	protected int crew_position = -1;
 	protected boolean alive = true;
 	protected shiphandler ships;
-	protected Vertex2d sprite = new Vertex2d(0, 0, 0, 0);
+	protected Vertex2d sprite = new Vertex2d(0, 0, 16, 16);
+	protected Vertex2d sprite_2 = new Vertex2d(16, 0, 32, 16);
+	protected Vertex2d sprite_3 = new Vertex2d(32, 0, 48, 16);
+	protected int movement_stage = 0;
+	protected int action_timer = 0;
+	protected int action_threshold = 60;
+	protected Tile frame_to_build;
 	protected Core core;
 	protected Path path;
+	protected boolean selected = false;
 	protected boolean moving = false;
 	protected boolean path_move = false;
+	protected ArrayList<Item> items = new ArrayList<Item>();
+	protected int target_tile = -1;
 	protected CrewHandler handler;
 
 	public Entity(Core core, CrewHandler h) {
@@ -64,35 +74,35 @@ public abstract class Entity {
 			open.add(current_addition[3]);
 		}
 		
-		while(!open.isEmpty()){
-			
+		while (!open.isEmpty()) {
+
 			int lowest_pos = open.get(0);
 			int lowest_heuristic = 0;
 			int open_pos = 0;
 			int heuristic = 0;
-			for(int i = 0; i < open.size();i++){
-				
+			for (int i = 0; i < open.size(); i++) {
+
 				Tile ct = handler.ship.get_tile(open.get(i));
-				heuristic = (int)Math.sqrt(Math.pow(finish.x - ct.get_pos().x,2) + Math.pow(finish.y - ct.get_pos().y,2)); 
-				if(i == 0){
+				heuristic = (int) Math.sqrt(Math.pow(finish.x - ct.get_pos().x,
+						2) + Math.pow(finish.y - ct.get_pos().y, 2));
+				if (i == 0) {
 					lowest_heuristic = heuristic;
 				}
-				if(heuristic < lowest_heuristic){
+				if (heuristic < lowest_heuristic) {
 					open_pos = i;
 					lowest_pos = open.get(i);
 					lowest_heuristic = heuristic;
 				}
 			}
-			if(heuristic == 0){
+			if (heuristic == 0) {
 				this.path = new Path();
 				int current_t = lowest_pos;
-				int super_t = handler.ship.get_tile(lowest_pos)
-						.get_super();
+				int super_t = handler.ship.get_tile(lowest_pos).get_super();
 				while (current_t != current_tile) {
 					Tile ct = handler.ship.get_tile(current_t);
 					Tile st = handler.ship.get_tile(super_t);
-					Vertex2d change = ct.get_pos().whole()
-							.sub(st.get_pos()).mult(16);
+					Vertex2d change = ct.get_pos().whole().sub(st.get_pos())
+							.mult(16);
 					path.add_step(change);
 					current_t = super_t;
 					super_t = handler.ship.get_tile(current_t).get_super();
@@ -170,11 +180,12 @@ public abstract class Entity {
 
 		return data;
 	}
-//	
+
+	//
 	protected boolean can_move(int a, ArrayList<Integer> closed,
 			ArrayList<Integer> open) {
 		if (handler.ship.get_tile(a) != null) {
-			if(handler.ship.get_tile(a).is_wall()){
+			if (handler.ship.get_tile(a).is_wall()) {
 				return false;
 			}
 			for (int i = 0; i < closed.size(); i++) {
@@ -237,8 +248,76 @@ public abstract class Entity {
 				+ (Math.round((relative.y + movement.y) / 16) * handler.ship.width);
 
 	}
+	public void set_frame(Tile frame){
+		this.frame_to_build = frame;
+	}
+	protected void construct(){
+		
+		if (action_timer == 0) {
+			if (target_tile != -1) {
+				calculate_variables();
+				
+				if (current_tile - 1 == target_tile
+						|| current_tile + 1 == target_tile
+						|| current_tile - handler.ship.ship.mapwidth == target_tile
+						|| current_tile + handler.ship.ship.mapwidth == target_tile) {
+					
+					if(frame_to_build != null){
+						action_timer = 1;
+						
+						
+						handler.ship.add_tile(frame_to_build);
+						frame_to_build = null;
+						return;
+					}
+				}
+				if (handler.ship.get_tile(target_tile) != null) {
+					calculate_variables();
+					if (current_tile - 1 == target_tile
+							|| current_tile + 1 == target_tile
+							|| current_tile - handler.ship.ship.mapwidth == target_tile
+							|| current_tile + handler.ship.ship.mapwidth == target_tile) {
+						Item[] required = handler.ship.get_tile(target_tile)
+								.get_required_resources();
+						int[] positions = new int[required.length];
+
+						int size = 0;
+						for (int i = 0; i < required.length; i++) {
+							for (int j = 0; j < items.size(); j++) {
+								positions[i] = -1;
+								if (items.get(j).get_name() == required[i]
+										.get_name()) {
+									positions[i] = j;
+									size += 1;
+								}
+							}
+						}
+						Item[] adding = new Item[size];
+						int pos = 0;
+						for (int i = 0; i < positions.length; i++) {
+							if (positions[i] != -1) {
+								adding[pos] = items.get(positions[i]);
+								pos += 1;
+							}
+						}
+						handler.ship.get_tile(target_tile)
+								.set_stored_resources(adding);
+					}
+				} else if(frame_to_build == null){
+					target_tile = -1;
+				}
+			}
+		}
+	}
 
 	public void tick() {
+		if(action_timer != 0){
+			action_timer ++;
+			if(action_timer >= action_threshold){
+				action_timer= 0;
+			}
+		}
+		this.construct();
 		if (handler.ship.get_tile(current_tile) != null && !set) {
 			last_position = handler.ship.correct_pos.whole();
 			position = new Vertex2d(Math.round(relative.x),
@@ -276,9 +355,32 @@ public abstract class Entity {
 				if (temp_pos == null) {
 					moving = false;
 					path_move = false;
+					movement_stage = 0;
 					return;
 				} else {
 					movement = temp_pos;
+				}
+			}
+			if (movement.x != 0 && movement.y != 0) {
+				if (movement.x % 16 == 0 || movement.y % 16 == 0) {
+					movement_stage++;
+					if (movement_stage == 3) {
+						movement_stage = 0;
+					}
+				}
+			} else if (movement.x != 0) {
+				if (movement.x % 16 == 0) {
+					movement_stage++;
+					if (movement_stage == 3) {
+						movement_stage = 0;
+					}
+				}
+			} else if (movement.y != 0) {
+				if (movement.y % 16 == 0) {
+					movement_stage++;
+					if (movement_stage == 3) {
+						movement_stage = 0;
+					}
 				}
 			}
 			if (movement.x > 0) {
@@ -305,12 +407,14 @@ public abstract class Entity {
 			}
 			if (ytrue && xtrue && !path_move) {
 				moving = false;
+				movement_stage = 0;
 			}
 			if (ytrue && xtrue && path_move) {
 				Vertex2d temp = path.next();
 				if (temp == null) {
 					moving = false;
 					path_move = false;
+					movement_stage = 0;
 				} else {
 					movement = temp;
 				}
@@ -319,8 +423,21 @@ public abstract class Entity {
 	}
 
 	public spritecomponent get_sprite() {
-		return core.crew_sprite.getcoords((int) sprite.x, (int) sprite.y,
-				(int) sprite.u, (int) sprite.v);
+		Vertex2d selected_sprite = sprite;
+		switch (movement_stage) {
+		case 0:
+			selected_sprite = sprite;
+			break;
+		case 1:
+			selected_sprite = sprite_2;
+			break;
+		case 2:
+			selected_sprite = sprite_3;
+			break;
+		}
+		return core.crew_sprite.getcoords((int) selected_sprite.x,
+				(int) selected_sprite.y, (int) selected_sprite.u,
+				(int) selected_sprite.v);
 	}
 
 	public void set_path(Path p) {
@@ -339,6 +456,18 @@ public abstract class Entity {
 
 	public Vertex2d get_render_pos() {
 		return render_pos;
+	}
+
+	public void set_selected(boolean selected) {
+		this.selected = selected;
+	}
+
+	public boolean selected() {
+		return this.selected;
+	}
+
+	public void set_target(int i) {
+		target_tile = i;
 	}
 
 }

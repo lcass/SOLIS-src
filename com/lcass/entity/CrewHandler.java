@@ -7,6 +7,7 @@ import com.lcass.core.DEFINES;
 import com.lcass.game.world.Ship;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
+import com.lcass.graphics.texture.spritecomponent;
 import com.lcass.util.Progressive_buffer;
 
 public class CrewHandler {
@@ -40,6 +41,7 @@ public class CrewHandler {
 	public Entity get_crew(int position) {
 		return position > entities.size() ? null : entities.get(position);
 	}
+	
 
 	public ArrayList<Entity> get_crew() {
 		return this.entities;
@@ -52,18 +54,36 @@ public class CrewHandler {
 		if (update) {
 			draw_data[0].clear();
 			draw_data[1].clear();
+			draw.clear_data();
 			for (Entity e : entities) {
-				Vertex2d tempv = e.relative.whole().mult(2);
-				
 				Progressive_buffer[] temp = core.G.rectangle((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,e.get_sprite());
 				draw_data[0].extend(temp[0]);
 				draw_data[1].extend(temp[1]);
+				if(e.selected()){
+					
+					Progressive_buffer[] tempselected = core.G.rectangle((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,core.crew_sprite.getcoords(48, 0, 64, 16));
+					draw_data[0].extend(tempselected[0]);
+					draw_data[1].extend(tempselected[1]);
+				}
 				}
 			draw.edit_data(draw_data);
 		}
-
+		draw.set_rot_pos(ship.get_rot_pos());
+		draw.rotate(ship.rotation);
 		
 
+	}
+	public Entity get_crew(Vertex2d position){
+		for(int i = 0;i < entities.size();i++){
+			Entity a= entities.get(i);
+			Vertex2d pos = a.get_position().whole().add(a.movement);
+			pos.div(16);
+			
+			if(pos.x == position.x && pos.y == position.y){
+				return entities.get(i);
+			}
+		}
+		return null;
 	}
 
 	public void render() {

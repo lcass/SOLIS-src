@@ -1,5 +1,17 @@
 package com.lcass.graphics.texture;
 
+import static org.lwjgl.opengl.GL11.GL_NEAREST;
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_RGBA8;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,8 +19,6 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
-
-import static org.lwjgl.opengl.GL11.*;
 //Many thanks to SHC for the tutorial on this
 public class Texture {
 	public int id;
@@ -66,6 +76,12 @@ public class Texture {
 					buffer.put((byte)0);
 					buffer.put((byte)0);
 					buffer.put((byte)0);
+				}
+				else if(pixels[y * bimg.getWidth() + x] == 0){
+					buffer.put((byte)-1);
+					buffer.put((byte)-1);
+					buffer.put((byte)-1);
+					buffer.put((byte)-1);
 				}
 				else{
 					buffer.put((byte)-1);
