@@ -30,7 +30,7 @@ public class Core{
 	public spritesheet proj_sprite;
 	public Core(){
 		G = new graphics(this);
-		G.create_display(width, height, "SOLIS", 4000, 60);
+		G.create_display(width, height, "SOLIS",200, 60);
 		
 		ih = new InputHandler(this);
 		crew_sprite = new spritesheet("textures/Entities.png");

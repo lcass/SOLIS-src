@@ -3,7 +3,9 @@ package com.lcass.game;
 import java.lang.reflect.Method;
 
 import com.lcass.core.Core;
+import com.lcass.entity.CrewHandler;
 import com.lcass.entity.Entity;
+import com.lcass.entity.Human;
 import com.lcass.game.tiles.Cable;
 import com.lcass.game.tiles.Cable_holder;
 import com.lcass.game.tiles.Corner;
@@ -35,6 +37,7 @@ public class Game {
 	private GUI power_control;
 	public Inventory inventory;
 	public float step = 2f, zoom = 1f;
+	public CrewHandler Entities;
 	private float timeheld = 0, max = 8;
 	public Vertex2d camera = new Vertex2d(0, 0);
 	public boolean docked = true;
@@ -70,8 +73,9 @@ public class Game {
 				"ohms  00000", 7);
 		power_loc = power_control.draw_text(new Vertex2d(5, 50), "watts 00000",
 				7);
-		voltage_loc = power_control
-				.draw_text(new Vertex2d(15, 20), "00000v", 7);
+		Entities = new CrewHandler(core);
+	
+		voltage_loc = power_control.draw_text(new Vertex2d(15, 20), "0000000000v", 7);
 		Method up = core.G.obtain_method(Inventory.class, "position_up");
 		Method down = core.G.obtain_method(Inventory.class, "position_down");
 		Method click1 = core.G.obtain_method(Inventory.class, "click1");
@@ -214,6 +218,9 @@ public class Game {
 		Ship s = new Ship(64, 64, core, w, ships);
 		s.set_position(new Vertex2d(0, 0));
 	    ships.add_ship(s);
+	    Entity a = new Human(core , Entities , ships, 0,-2);
+		a.set_position(new Vertex2d(32,32,0,0));
+		Entities.add_crew(a);
 	}
 
 	public void tick() {
@@ -339,7 +346,7 @@ public class Game {
 
 					}
 				} else if (inventory.get_selectedposition() == 5) {
-					ships.coreship.crew_handler.get_crew(0).move_to_loc(
+					Entities.get_crew_id(selected_entity.get_id()).move_to_loc(
 							actual.whole().mult(32));
 				}
 			}
@@ -464,12 +471,17 @@ public class Game {
 				}
 
 				if (inventory.get_selectedposition() == 5) {
-					if (ships.coreship.crew_handler.get_crew(actual) == null
-							&& selected_entity != null) {
+					if (Entities.get_crew(actual) == null
+							&& selected_entity != null ) {
 						selected_entity.set_selected(false);
 					}
-					selected_entity = ships.coreship.crew_handler
-							.get_crew(actual);
+					if(Entities.get_crew(actual) != null){
+						if(Entities.get_crew(actual).get_owner() == -2){
+							selected_entity = Entities
+									.get_crew(actual);
+						}
+					}
+					
 					if (selected_entity != null) {
 						if (currently_selected.x != -1
 								&& currently_selected.x != -2) {
@@ -577,7 +589,7 @@ public class Game {
 						Tile[] shootable = weapons.weapons;
 						for(int i = 0 ; i < shootable.length;i++){
 							if(shootable[i]  != null){
-								Vertex2d move = ships.coreship.ph.calc_step(shootable[i].get_world_pos(),actual.whole().mult(32));
+								Vertex2d move = ships.coreship.ph.calc_step(shootable[i].get_world_pos(),actual.whole().mult(32).add(ships.coreship.correct_pos));
 							
 								ships.coreship.ship.get_tile(shootable[i].get_pos()).set_movement(move);
 								ships.coreship.ship.get_tile(shootable[i].get_pos()).fire();
@@ -587,6 +599,7 @@ public class Game {
 				}
 			}
 		}
+		Entities.tick();
 
 	}
 
@@ -597,6 +610,7 @@ public class Game {
 		} else {
 
 			ships.render();
+			Entities.render();
 		}
 		inventory_gui.render();
 

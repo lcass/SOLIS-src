@@ -21,7 +21,7 @@ public class Ship {
 	private Core core;
 	public int width, height;
 	public float mass;
-
+	public int ship_id = -3;//-2 is core -1 is there is no ship
 	private float velocity_vert = 0, velocity_horiz = 0;
 	private float powerright = 0, powerleft = 0, powerup = 0, powerdown = 0;
 	private boolean is_ai = false;
@@ -33,6 +33,7 @@ public class Ship {
 	private Progressive_buffer[] overlay_buffer = new Progressive_buffer[2];
 	public Tile[] map, edges;
 	public Vertex2d[] collision;
+	public Vertex2d cam_rotation = new Vertex2d(0,0,0,0);//no rotation 
 	private shiphandler sh;
 	public float compound_rotation = 0;
 	public boolean overlay_reset = false;
@@ -44,7 +45,6 @@ public class Ship {
 	private boolean particles_generated = false;
 	private Particles particles;
 	private Resourcehandler resources;
-	public CrewHandler crew_handler;
 	public ProjectileHandler ph;
 	public Vertex2d absolute_position, position, BackCOM, ForeCOM, UpCOM,
 			DownCOM, COM, camera, forwardthrust, upthrust, downthrust,// position
@@ -90,10 +90,6 @@ public class Ship {
 		this.sh = sh;
 		generate_edges();
 		resources = new Resourcehandler(this);
-		crew_handler = new CrewHandler(core, this);
-		Entity add = new Human(core, crew_handler);
-		add.set_position(new Vertex2d(16, 16));
-		crew_handler.add_crew(add);
 		overlay_buffer[0] = new Progressive_buffer(null, false);
 		overlay_buffer[1] = new Progressive_buffer(null, true);
 		overlay = new VBO(core.G.mainvbo);
@@ -119,6 +115,10 @@ public class Ship {
 			}
 		}
 		generate_edges();
+	}
+	public int tile_at(Vertex2d position) {
+		int coordinate = (int) (position.x + (ship.mapwidth * position.y));
+		return coordinate;
 	}
 
 	public void calculate_steps() {
@@ -653,7 +653,6 @@ public class Ship {
 		effects.render();
 		particles.render();
 		ph.render();
-		crew_handler.render();
 		overlay.render();
 
 	}
@@ -765,17 +764,23 @@ public class Ship {
 		absolute_position.y += adjusted.y;
 		correct_pos.x += position.x;
 		correct_pos.y += position.y;
-		crew_handler.tick();
 		if (!position_manual) {
 			effects.transform(camera);
 		}
-		effects.rotate(compound_rotation);
-
-		ship.rotate(compound_rotation);
-		ship.set_rot_pos(rotpoint);
-
-		effects.set_rot_pos(rotpoint);
-		overlay.rotate(compound_rotation);
+		effects.rotate(cam_rotation.u);
+		effects.rotate_2(compound_rotation);
+		ship.rotate_2(compound_rotation);
+		ship.rotate(cam_rotation.u);
+		ship.set_rot_pos_2(rotpoint);
+		
+		ship.set_rot_pos(cam_rotation);
+		
+		effects.set_rot_pos(cam_rotation);
+		effects.set_rot_pos_2(rotpoint);
+		overlay.set_rot_pos(cam_rotation);
+		overlay.set_rot_pos_2(rotpoint);
+		overlay.rotate(cam_rotation.u);
+		overlay.rotate_2(compound_rotation);
 		overlay.set_position(camera);
 		rotation += -(position.u / 100);
 		compound_rotation = rotation + rotation_offset;
@@ -1140,6 +1145,15 @@ public class Ship {
 	}
 	public void regen_world(){
 		ship.regen();
+	}
+	public void bind_cam_rotation(Vertex2d rot){
+		this.cam_rotation = rot;
+	}
+	public void set_ship_id(int i){
+		this.ship_id = i;
+	}
+	public int get_ship_id(){
+		return ship_id;
 	}
 
 }

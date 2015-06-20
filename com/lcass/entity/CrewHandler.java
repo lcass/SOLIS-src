@@ -16,19 +16,18 @@ public class CrewHandler {
 	private VBO draw;
 	private Progressive_buffer[] draw_data = new Progressive_buffer[2];
 	private Core core;
-	public Ship ship;
 
-	public CrewHandler(Core core, Ship s) {
+	public CrewHandler(Core core) {
 		this.core = core;
 		draw = new VBO(core.G.mainvbo);
 		draw_data[0] = new Progressive_buffer(null, false);
 		draw_data[1] = new Progressive_buffer(null, true);
 		draw.create(1000);
 		draw.bind_texture(core.crew_sprite.gettexture());
-		this.ship = s;
 	}
 
 	public int add_crew(Entity e) {
+		e.set_id(entities.size());
 		entities.add(e);
 		update = true;
 		return entities.size() - 1;
@@ -40,6 +39,14 @@ public class CrewHandler {
 
 	public Entity get_crew(int position) {
 		return position > entities.size() ? null : entities.get(position);
+	}
+	public Entity get_crew_id(int id) {
+		for(Entity e : entities){
+			if(e.get_id() == id){
+				return e;
+			}
+		}
+		return null;
 	}
 	
 
@@ -56,20 +63,30 @@ public class CrewHandler {
 			draw_data[1].clear();
 			draw.clear_data();
 			for (Entity e : entities) {
-				Progressive_buffer[] temp = core.G.rectangle((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,e.get_sprite());
-				draw_data[0].extend(temp[0]);
-				draw_data[1].extend(temp[1]);
+				Vertex2d[] temp = core.G.rectangle_vert((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,e.get_sprite());
+				Vertex2d rot = e.get_rotation();
+				if(rot.u != 0){
+					temp = com.lcass.util.Util.rotate(temp, rot, rot.u);
+				}
+				Progressive_buffer[] temp_prog = core.G.to_buffer(temp);
+				draw_data[0].extend(temp_prog[0]);
+				draw_data[1].extend(temp_prog[1]);
 				if(e.selected()){
 					
-					Progressive_buffer[] tempselected = core.G.rectangle((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,core.crew_sprite.getcoords(48, 0, 64, 16));
-					draw_data[0].extend(tempselected[0]);
-					draw_data[1].extend(tempselected[1]);
+					Vertex2d[] tempselected = core.G.rectangle_vert((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,core.crew_sprite.getcoords(48, 0, 64, 16));
+					if(rot.u != 0){
+						temp = com.lcass.util.Util.rotate(tempselected, rot, rot.u);
+					}
+					Progressive_buffer[] temp_selected = core.G.to_buffer(tempselected);
+					draw_data[0].extend(temp_selected[0]);
+					draw_data[1].extend(temp_selected[1]);
 				}
 				}
 			draw.edit_data(draw_data);
 		}
-		draw.set_rot_pos(ship.get_rot_pos());
-		draw.rotate(ship.rotation);
+		Vertex2d rotation = core.game.ships.get_cam_rotation();
+		draw.set_rot_pos(rotation);
+		draw.rotate(rotation.u);
 		
 
 	}
@@ -88,7 +105,7 @@ public class CrewHandler {
 
 	public void render() {
 		
-		draw.set_position(ship.camera);
+		draw.set_position(core.game.ships.coreship.camera.whole().sub(core.game.ships.coreship.absolute_position));
 		draw.render();
 	}
 

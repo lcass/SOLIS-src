@@ -308,6 +308,53 @@ public class graphics {
 		Progressive_buffer texbuffer = new Progressive_buffer(data, true);
 		return new Progressive_buffer[] { buffer, texbuffer };
 	}
+	public Vertex2d[] square_vert(int x, int y, int sizelen,
+			spritecomponent s) {
+		float sizex = convert_coordinate(sizelen * 2, width);
+		float sizey = convert_coordinate(sizelen * 2, height);
+		x = x * 2;
+		y = y * 2;
+		x = x - (width);
+		y = y - (height - sizelen);
+		
+		Vertex2d new_coords = convert_coordinates(x, y);
+		float xp = new_coords.x;
+		float yp = new_coords.y;
+
+		Vertex2d[] data = new Vertex2d[] { new Vertex2d(xp, yp, s.x, s.y),
+				new Vertex2d(xp + sizex, yp, s.ex, s.y),
+				new Vertex2d(xp, yp - sizey, s.x, s.ey),
+				new Vertex2d(xp + sizex, yp - sizey, s.ex, s.ey),
+				new Vertex2d(xp, yp - sizey, s.x, s.ey),
+				new Vertex2d(xp + sizex, yp, s.ex, s.y) };
+		return data;
+	}
+	public Progressive_buffer[] to_buffer(Vertex2d[] data){
+		Progressive_buffer buffer = new Progressive_buffer(data, false);
+		Progressive_buffer texbuffer = new Progressive_buffer(data, true);
+		return new Progressive_buffer[] { buffer, texbuffer };
+	}
+
+	public Vertex2d[] rectangle_vert(int x, int y, int width, int height,
+			spritecomponent s) {
+		float sizex = convert_coordinate(width *2, this.width);
+		float sizey = convert_coordinate(height * 2, this.height);
+		x = x * 2;
+		y = y * 2;
+		x = x - (this.width);
+		y = y - (this.height - (height * 2));
+		Vertex2d new_coords = convert_coordinates(x, y);
+		float xp = new_coords.x;
+		float yp = new_coords.y;
+		
+		Vertex2d[] data = new Vertex2d[] { new Vertex2d(xp, yp, s.x, s.y),
+				new Vertex2d(xp + sizex, yp, s.ex, s.y),
+				new Vertex2d(xp, yp - sizey, s.x, s.ey),
+				new Vertex2d(xp + sizex, yp - sizey, s.ex, s.ey),
+				new Vertex2d(xp, yp - sizey, s.x, s.ey),
+				new Vertex2d(xp + sizex, yp, s.ex, s.y) };
+		return data;
+	}
 	public Vertex2d convert_coordinates(Vertex2d coordinates){
 		Vertex2d temp = new Vertex2d(coordinates.x * 2, coordinates.y * 2);
 		temp.x = (temp.x )/width;

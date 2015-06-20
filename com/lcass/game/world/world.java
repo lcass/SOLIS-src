@@ -562,6 +562,13 @@ public class world {
 	public void set_rot_pos(Vertex2d pos) {
 		drawdata.set_rot_pos(pos);
 	}
+	public void rotate_2(float angle) {
+		drawdata.rotate_2(angle);
+	}
+
+	public void set_rot_pos_2(Vertex2d pos) {
+		drawdata.set_rot_pos_2(pos);
+	}
 
 	public void clear_rebuild(Tile[] tiles) {
 		drawdata.clear_data();

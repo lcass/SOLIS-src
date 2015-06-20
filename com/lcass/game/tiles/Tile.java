@@ -111,7 +111,7 @@ public abstract class Tile implements Serializable{
 		this.dir = dir;
 	}
 	public void set_ship(int ship){
-		System.out.println(ship);
+		
 		this.ship = ship;
 	}
 	public int get_ship(){

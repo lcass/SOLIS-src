@@ -11,7 +11,7 @@ public class Effect_builder {
 	private int length = 0;
 	private int cycle = 0;
 	private int max_cycle = 0;
-	private Vertex2d transformation, rotpos;
+	private Vertex2d transformation, rotpos,rotpos_2;
 	private ArrayList<Effect> Effects = new ArrayList<Effect>();
 	boolean[] indexs;
 	private VBO draw_data;
@@ -84,10 +84,19 @@ public class Effect_builder {
 	public void set_rot_pos(Vertex2d position) {
 		rotpos = position;
 	}
+	public void rotate_2(float angle) {
+		transformation.v = angle;
+	}
+
+	public void set_rot_pos_2(Vertex2d position) {
+		rotpos_2 = position;
+	}
 
 	public void tick() {
 		draw_data.set_position(transformation);
 		draw_data.rotate(transformation.u);
+		draw_data.set_rot_pos_2(rotpos_2);
+		draw_data.rotate_2(transformation.v);
 		data_updated = false;
 		draw_data.clear_data();
 		draw_data.set_rot_pos(rotpos);
