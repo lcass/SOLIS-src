@@ -15,7 +15,7 @@ import com.lcass.util.Progressive_buffer;
 public class VBO {
 	public int vertid, texid, texcoordid, vertcount;
 	private Texture t;
-	private Vertex2d transformation, color, rotation_pos;
+	private Vertex2d transformation, color, rotation_pos,rotation_pos_2;
 	private int bloom = 0;
 	private boolean functional = false;
 	private boolean point_vbo = false;
@@ -24,7 +24,7 @@ public class VBO {
 	private CoreVBO super_vbo;
 	private boolean is_line = false;
 	private int width, height;
-	private float rotate = 0;
+	private float rotate = 0,rotate_2 = 0;
 	private float time = 0;//used by particles only but useful if implementing similar effects
 	private float render_ticks = 1;
 	private float decay = 0;
@@ -51,6 +51,8 @@ public class VBO {
 		Vertex2d temp = Core.get_dimensions();
 		width = (int) temp.x;
 		rotation_pos = new Vertex2d(0, 0, 0, 0);
+		rotation_pos_2 = new Vertex2d(0,0,0,0);
+		
 		height = (int) temp.y;
 
 	}
@@ -309,6 +311,13 @@ public class VBO {
 	public void set_rot_pos(Vertex2d rotpos) {
 		this.rotation_pos = rotpos;
 	}
+	public void rotate_2(float angle) {
+		rotate_2 = angle;
+	}
+
+	public void set_rot_pos_2(Vertex2d rotpos) {
+		this.rotation_pos_2 = rotpos;
+	}
 
 	public void set_zoom(float zoom) {
 		transformation.u = zoom;
@@ -404,6 +413,7 @@ public class VBO {
 				GL20.glUniform1f(super_vbo.locationzoom, transformation.u);
 				GL20.glUniform2f(super_vbo.locationtransform, transformation.x,
 						transformation.y);
+				GL20.glUniform3f(super_vbo.locationrotatepos_2, rotation_pos_2.x , rotation_pos_2.y , rotate_2);
 				GL20.glUniform1f(super_vbo.locationrotate, rotate);
 				GL20.glUniform1f(super_vbo.locationtime, time);
 
@@ -472,5 +482,6 @@ public class VBO {
 	public int get_vertcount() {
 		return vertcount;
 	}
+
 
 }

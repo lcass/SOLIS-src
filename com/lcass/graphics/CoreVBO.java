@@ -9,6 +9,7 @@ public class CoreVBO {
 	public static int shader_id,vert_id,tex_id,particle_shader,particle_vert,particle_tex,particle_geom;
 	public static int locationattribtex, locationattribvertex;
 	public static int location_color;
+	public static int locationrotatepos_2;
 	public static int particle_transform,particle_dimension,particle_time,particleattribvert,particleattribtex,particle_spawn,particle_decay,particle_alpha,particle_size,particle_velocity;
 	private Shaderclass shaderclass,line_shader_class,particle_shader_class;
 	public CoreVBO(){
@@ -35,6 +36,7 @@ public class CoreVBO {
 		particle_tex = particle_shader_class.fragmentShaderID;
 		particle_geom = particle_shader_class.geometryShaderID;
 		locationrotatepos = GL20.glGetUniformLocation(shader_id, "rotpos");
+		locationrotatepos_2 = GL20.glGetUniformLocation(shader_id, "rotpos_2");
 		locationtime = GL20.glGetUniformLocation(shader_id, "timein");
 		locationbloom = GL20.glGetUniformLocation(shader_id, "bloomval");
 		locationtransform = GL20.glGetUniformLocation(shader_id, "transform");
@@ -55,8 +57,7 @@ public class CoreVBO {
 		particleattribvert = GL20.glGetAttribLocation(particle_shader, "vecin");
 		particleattribtex = GL20.glGetAttribLocation(particle_shader, "texin");
 		particle_velocity = GL20.glGetUniformLocation(particle_shader, "velocity");
-		System.out.println(particle_size);
-		
+
 		
 	}
 	public void bind_shader(){

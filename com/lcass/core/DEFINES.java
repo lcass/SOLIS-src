@@ -11,5 +11,5 @@ public class DEFINES{
 	public static final int DEFAULT_GYRO_POWER = 1;
 	public static final int ENTITY_WIDTH = 32;
 	public static final int ENTITY_HEIGHT = 32;
-	
+	public static final int Y_ADJUST_MOUSE = 6;
 }

@@ -21,6 +21,8 @@ public class GUI {
 	private Core core;
 	private Vertex2d position;
 	private TextGenerator tg;
+	private Vertex2d ac_translate = new Vertex2d(0,0,0,0);
+	private Vertex2d translate = new Vertex2d(0,0,0,0);
 	private boolean hasdata = false, updated = false;
 	
 	private ArrayList<Button> buttons = new ArrayList<Button>();
@@ -66,6 +68,7 @@ public class GUI {
 			current_data[1].clear();
 		}
 		for (int i = 0; i < buttons.size(); i++) {
+			buttons.get(i).set_trans(ac_translate);
 			buttons.get(i).throw_at_GUI();
 			
 		}
@@ -77,8 +80,12 @@ public class GUI {
 	}
 
 	public void render() {
+		backdata.set_position(new Vertex2d(translate.x,translate.y,0,0));
 		backdata.render();
+		coredata.set_position(new Vertex2d(translate.x,translate.y,0,0));
+		textdata.set_position(new Vertex2d(translate.x,translate.y,0,0));
 		if (hasdata) {
+			
 			coredata.render();
 		}
 		textdata.render();
@@ -120,5 +127,10 @@ public class GUI {
 		for(int i = 0;i < buttons.size();i++){
 			buttons.get(i).set_instance(a);
 		}
+	}
+	public void set_translation(Vertex2d translate){
+		ac_translate = translate.whole();
+		this.translate = core.G.convert_coordinates(ac_translate).sub(new Vertex2d(0,2,0,0));
+		
 	}
 }

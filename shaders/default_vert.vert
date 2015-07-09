@@ -7,6 +7,7 @@ uniform float zoom;
 uniform vec2 rotpos;
 uniform float light;
 uniform int bloomval;
+uniform vec3 rotpos_2;
 varying vec2 vecdata;
 varying float time;
 varying float bloom;
@@ -32,7 +33,7 @@ vec2 stage2 = vec2((stage1.x )/dimension.x,(stage1.y )/dimension.y);
 return stage2;
 }
 void main(){
-	color_out = color_in;
+   color_out = color_in;
    time = timein;
    bloom = bloomval;
    lightlines=light;
@@ -41,23 +42,50 @@ void main(){
    }
    
    vec4 offset;
+   vec4 offset_2;
    if(rotation != 0){
-	  
-	   rotpos *=2;
-	  
-	   vec2 temp = convertback(vec2(position.x,position.y));
-	   offset = vec4(temp.x - rotpos.x,temp.y - rotpos.y,1,1);
-	   mat4 RotationMatrix = mat4( cos( rotation ), sin( rotation ), 0.0, 0.0,
-	             -
-	             sin( rotation ),  cos( rotation ), 0.0, 0.0,
-	                      0.0,           0.0, 1.0, 0.0,
-	                 0.0,           0.0, 0.0, 1.0 );
-	                
-	   offset *= RotationMatrix;
-	   temp = convertto(vec2(offset.x+ rotpos.x,offset.y + rotpos.y));
-	   offset = vec4((temp.x ) + transform.x ,temp.y + transform.y,1,1);
-   }else{
-   	offset = vec4((position.x+transform.x) * zoom,(position.y+transform.y) *zoom,1,1);
+     
+      rotpos *=2;
+     
+      vec2 temp = convertback(vec2(position.x,position.y));
+      offset = vec4(temp.x - rotpos.x,temp.y - rotpos.y,1,1);
+      mat4 RotationMatrix = mat4( cos( rotation ), sin( rotation ), 0.0, 0.0,
+                -
+                sin( rotation ),  cos( rotation ), 0.0, 0.0,
+                         0.0,           0.0, 1.0, 0.0,
+                    0.0,           0.0, 0.0, 1.0 );
+                   
+      offset *= RotationMatrix;
+      
+      temp = convertto(vec2(offset.x+ rotpos.x,offset.y + rotpos.y));
+      offset = vec4((temp.x ) + transform.x ,temp.y + transform.y,1,1);
+      
+      
+   }if(rotpos_2.z != 0){
+         vec2 rot_pos_2 = rotpos_2.xy *=2;
+         vec2 temp;
+     	if(rotation != 0){
+    	   temp = convertback(vec2(offset.x- transform.x,offset.y - transform.y));
+   		   offset_2 = vec4(temp.x - rot_pos_2.x,temp.y - rot_pos_2.y,1,1);
+   		   }
+   		   else{
+   		   		 temp = convertback(vec2(position.x,position.y));
+    			 offset_2 = vec4(temp.x - rot_pos_2.x,temp.y - rot_pos_2.y,1,1);
+    			 }
+   		   mat4 RotationMatrix = mat4( cos( rotpos_2.z ), sin(  rotpos_2.z ), 0.0, 0.0,
+                -
+                sin(  rotpos_2.z ),  cos(  rotpos_2.z ), 0.0, 0.0,
+                         0.0,           0.0, 1.0, 0.0,
+                    0.0,           0.0, 0.0, 1.0 );
+                   
+      offset_2 *= RotationMatrix;
+      
+      temp = convertto(vec2(offset_2.x+ rot_pos_2.x,offset_2.y + rot_pos_2.y));
+      offset = vec4((temp.x ) + transform.x ,temp.y + transform.y,1,1);
+      
+   }
+   if(rotation == 0 && rotpos_2.z == 0){
+      offset = vec4((position.x+transform.x) * zoom,(position.y+transform.y) *zoom,1,1);
    }
    gl_Position = offset;
    vecdata = texin;

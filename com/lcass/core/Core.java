@@ -20,7 +20,7 @@ public class Core{
 	public graphics G;
 
 	public Game game;
-	private world a, b;
+	
 	public InputHandler ih;
 	private Progressive_buffer[] background;
 	private spritesheet background_sprite;
@@ -30,7 +30,7 @@ public class Core{
 	public spritesheet proj_sprite;
 	public Core(){
 		G = new graphics(this);
-		G.create_display(width, height, "SOLIS", 4000, 60);
+		G.create_display(width, height, "SOLIS",100, 60);
 		
 		ih = new InputHandler(this);
 		crew_sprite = new spritesheet("textures/Entities.png");
