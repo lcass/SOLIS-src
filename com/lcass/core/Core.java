@@ -28,6 +28,7 @@ public class Core{
 	public spritesheet crew_sprite;
 	public spritesheet tile_sprite;
 	public spritesheet proj_sprite;
+	public spritesheet item_sprite;
 	public Core(){
 		G = new graphics(this);
 		G.create_display(width, height, "SOLIS",100, 60);
@@ -46,6 +47,7 @@ public class Core{
 		effect_sprite = new spritesheet("textures/effects.png");
 		particle_sprite = new spritesheet("textures/particles.png");
 		proj_sprite = new spritesheet("textures/projectiles.png");
+		item_sprite = new spritesheet("textures/items.png");
 		game = new Game(new world(this,64,64 , -2),this);
 		//bind resize method
 		Method resize = G.obtain_method(this.getClass(), "resize");

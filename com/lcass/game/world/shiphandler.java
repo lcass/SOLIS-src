@@ -563,7 +563,6 @@ public class shiphandler {
 						Vertex2d adjusted = map[j].get_pos().whole()
 								.add(world_ships[i].correct_pos).div(32)
 								.to_int();
-						System.out.println(adjusted_pos.x);
 						if (adjusted_pos.x == adjusted.x
 								&& adjusted_pos.y == adjusted.y) {
 							return new Vertex2d(i, j);

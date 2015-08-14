@@ -1155,5 +1155,16 @@ public class Ship {
 	public int get_ship_id(){
 		return ship_id;
 	}
+	public void interact(int position){
+		if(map[position] != null){
+			
+		}
+	}
+	public void bump(Vertex2d location,Entity e){
+		int tile = tile_at(location);
+		if(get_tile(tile) != null){
+			get_tile(tile).bump(e);
+		}
+	}
 
 }

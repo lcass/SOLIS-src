@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.lcass.core.Core;
+import com.lcass.entity.Entity;
 import com.lcass.game.Items.Item;
 import com.lcass.game.world.world;
 import com.lcass.graphics.Vertex2d;
@@ -33,7 +34,6 @@ public abstract class Tile implements Serializable{
 	protected int type = 0;
 	protected Item[] required = new Item[0];
 	protected ArrayList<Item> stored = new ArrayList<Item>();
-	protected Tile final_tile = null;
 	protected int array_pos = 0;
 	protected int ship = 0;
 	protected boolean is_wall = false;
@@ -251,12 +251,7 @@ public abstract class Tile implements Serializable{
 	public boolean is_wall(){
 		return is_wall;
 	}
-	public void set_final(Tile t){
-		this.final_tile = t;
-	}
-	public Tile get_final(){
-		return this.final_tile;
-	}
+	
 	public void set_resources(Item[] i){
 		required = i;
 	}
@@ -284,8 +279,8 @@ public abstract class Tile implements Serializable{
 		return this.is_weapon;
 	}
 	public Vertex2d get_world_pos(){
-		if(core.game.ships.get_ship(ship)!= null){
-			Vertex2d pos = core.game.ships.get_ship(ship).correct_pos.whole().add(position.whole().mult(32));
+		if(core.game.universe.get_ship(ship)!= null){
+			Vertex2d pos = core.game.universe.get_ship(ship).correct_pos.whole().add(position.whole().mult(32));
 			
 			return pos;
 		}
@@ -295,6 +290,12 @@ public abstract class Tile implements Serializable{
 		
 	}
 	public void set_movement(Vertex2d mov){
+		
+	}
+	public void interact(Entity e){
+		//do stuff
+	}
+	public void bump(Entity e){
 		
 	}
 	

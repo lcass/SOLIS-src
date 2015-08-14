@@ -36,6 +36,28 @@ public class Util {
 		
 		return new Vertex2d(((nx * cos) - (ny * sin)) + rotation_point.x,((nx * sin) + (ny * cos))+ rotation_point.y,((nu * cos) - (nv * sin))+rotation_point.x,((nu * sin) + (nv *cos)) + rotation_point.y);
 	}
+	public static boolean adjacent(Vertex2d position_in , Vertex2d target){
+		System.out.println(position_in.x);
+		System.out.println(target.x);
+		Vertex2d position = position_in.whole();
+		position.sub(new Vertex2d(position.x % 32, position.y %32));
+		if(position.equals(target)){
+			return true;
+		}
+		if(position.whole().add(new Vertex2d(32,0,0,0)).equals(target)){
+			return true;
+		}
+		if(position.whole().add(new Vertex2d(-32,0,0,0)).equals(target)){
+			return true;
+		}
+		if(position.whole().add(new Vertex2d(0,32,0,0)).equals(target)){
+			return true;
+		}
+		if(position.whole().add(new Vertex2d(0,-32,0,0)).equals(target)){
+			return true;
+		}
+		return false;
+	}
 	
 	
 }

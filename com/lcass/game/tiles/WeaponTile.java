@@ -31,8 +31,8 @@ public abstract class WeaponTile extends Tile{
 		Projectile round = new Bullet(core);
 		round.set_move(proj_mov);
 		round.set_position(get_world_pos().whole());
-		round.set_handler(core.game.ships.get_ship(ship).ph);
-		core.game.ships.get_ship(ship).ph.add(round);
+		round.set_handler(core.game.universe.get_ship(ship).ph);
+		core.game.universe.get_ship(ship).ph.add(round);
 		
 	}
 	

@@ -22,6 +22,20 @@ public class Button{
 			active = gui.graph.rectangle((int)position.x, (int)position.y, 142, 26, gui.button_sheet.getcoords(1, 31, 143, 57));
 		}
 	}
+	public Button(Vertex2d position,boolean textured, GUI gui,Encapsulated_method callfunction,String text){
+		this.position = position;
+		this.gui = gui;
+		call = callfunction;
+		this.textured = textured;
+		if(textured){
+			inactive = gui.graph.rectangle((int)position.x, (int)position.y, 128, 26, gui.button_sheet.getcoords(1, 1, 129, 27));
+			active = gui.graph.rectangle((int)position.x, (int)position.y, 142, 26, gui.button_sheet.getcoords(1, 31, 143, 57));
+		}
+		if(gui!=null){
+			gui.draw_text_screen(position.whole().add(new Vertex2d(2,2)), text, 9);
+			
+		}
+	}
 	
 	public void throw_at_GUI(){
 		if(!textured){

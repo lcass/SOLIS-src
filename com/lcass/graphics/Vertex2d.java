@@ -105,4 +105,26 @@ public class Vertex2d {//2d for texture and for vert coords
 		v = (int)v;
 		return this;
 	}
+	public Vertex2d ceil(){
+		x = (float) Math.ceil(x);
+		y = (float)Math.ceil(y);
+		u = (float)Math.ceil(u);
+		v = (float)Math.ceil(v);
+		return this;
+	}
+	public boolean equals(Vertex2d check){
+		if(this.x != check.x){
+			return false;
+		}
+		if(this.y != check.y){
+			return false;
+		}
+		if(this.u != check.u){
+			return false;
+		}
+		if(this.v != check.v){
+			return false;
+		}
+		return true;
+	}
 }

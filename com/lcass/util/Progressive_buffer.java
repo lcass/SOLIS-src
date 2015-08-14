@@ -86,6 +86,9 @@ public class Progressive_buffer {
 	}
 
 	public void extend(Progressive_buffer indata) {
+		if(indata == null){
+			return;
+		}
 		float[] temp = new float[setsize];
 		FloatBuffer indatanew = indata.get_data();
 		Vertex2d[] data = new Vertex2d[indata.get_data().capacity() / 2];

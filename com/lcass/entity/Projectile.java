@@ -29,7 +29,7 @@ public abstract class Projectile {
 		abs_pos.add(move);
 		tickcount ++;
 		
-		core.game.ships.proj_collision_check(this);
+		core.game.universe.ships.proj_collision_check(this);
 		if(tickcount >= 500){
 			ph.remove(this);
 		}
@@ -52,7 +52,7 @@ public abstract class Projectile {
 	}
 	public void render(){
 		
-		render.set_position(core.G.convert_coordinates(position.whole().sub(core.game.ships.get_ship(ph.ship).correct_pos)).add(core.game.ships.get_ship(ph.ship).camera));
+		render.set_position(core.G.convert_coordinates(position.whole().sub(core.game.universe.get_ship(ph.ship).correct_pos)).add(core.game.universe.get_ship(ph.ship).camera));
 
 		//render.set_rot_pos(x);
 		//render.set_rotation(y);

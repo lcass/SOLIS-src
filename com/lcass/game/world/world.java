@@ -88,7 +88,9 @@ public class world {
 		int coordinate = (int) (pos.x + (pos.y * mapwidth));
 
 		if (coordinate < tilemap.length) {
-
+			if(tilemap[coordinate] != null){
+				remove_tile(pos);
+			}
 			tilemap[coordinate] = t;
 			tilemap[coordinate].set_world(this);
 			tilemap[coordinate].bind();

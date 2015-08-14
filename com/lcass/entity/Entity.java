@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import com.lcass.core.Core;
 import com.lcass.game.Items.Item;
+import com.lcass.game.Items.construction.Construction;
+import com.lcass.game.tiles.Frame;
 import com.lcass.game.tiles.Tile;
 import com.lcass.game.world.Ship;
 import com.lcass.game.world.shiphandler;
@@ -15,28 +17,30 @@ public abstract class Entity {
 	protected Vertex2d abs_pos, position, movement = new Vertex2d(0, 0, 0, 0),
 			last_position = new Vertex2d(0, 0, 0, 0),
 			render_pos = new Vertex2d(0, 0, 0, 0);
-
-	protected int current_tile = 0;
-	protected int ship = -1;
-	protected int owner = -1;
-	protected boolean alive = true;
-	protected shiphandler ships;
 	protected Vertex2d sprite = new Vertex2d(0, 0, 16, 16);
 	protected Vertex2d sprite_2 = new Vertex2d(16, 0, 32, 16);
 	protected Vertex2d sprite_3 = new Vertex2d(32, 0, 48, 16);
+	protected Vertex2d interaction = new Vertex2d(0, 0, 0, 0);
+	protected int current_tile = 0;
+	protected int ship = -1;
+	protected int owner = -1;
 	protected int movement_stage = 0;
 	protected int action_timer = 0;
 	protected int action_threshold = 60;
-	protected Tile frame_to_build;
-	protected Core core;
-	protected Path path;
 	protected int id = -1;// unset
+	protected int target_tile = -1;
+	protected boolean alive = true;
 	protected boolean selected = false;
 	protected boolean moving = false;
 	protected boolean path_move = false;
-	protected ArrayList<Item> items = new ArrayList<Item>();
-	protected int target_tile = -1;
+	protected boolean interacting = false;
+	protected shiphandler ships;
+	protected Tile frame_to_build;
+	protected Core core;
+	protected Path path;
 	protected CrewHandler handler;
+	protected Item[] items = new Item[10];
+	protected Item selected_item;
 
 	public Entity(Core core, CrewHandler h, shiphandler ship, int id, int owner) {
 		this.core = core;
@@ -53,11 +57,19 @@ public abstract class Entity {
 	}
 
 	public void set_position(Vertex2d position) {
-		this.position = position;
+		this.last_position = position;
+		calculate_variables();
 
 	}
 
-	public void move_to_loc(Vertex2d finished) {
+	public boolean move_to_loc(Vertex2d finished) {
+		if (ships.get_ship(ship) == null) {
+			return false;
+		}
+		if (ships.get_ship(ship).get_tile(
+				ships.get_ship(ship).tile_at(finished.whole().div(32))) == null) {
+			return false;
+		}
 		calculate_variables();
 		this.moving = true;
 		Vertex2d finish = finished.whole().div(32);
@@ -65,7 +77,6 @@ public abstract class Entity {
 		ArrayList<Integer> open = new ArrayList<Integer>();
 		ArrayList<Integer> closed = new ArrayList<Integer>();
 		closed.add(current_tile);
-
 		int[] current_addition = moveable(current_tile, closed, open);
 		if (current_addition[0] != -1) {
 			open.add(current_addition[0]);
@@ -115,7 +126,7 @@ public abstract class Entity {
 				}
 				path.add_step(movement);
 				path.invert();
-				return;
+				return true;
 			}
 			closed.add(lowest_pos);
 			open.remove(open_pos);
@@ -134,6 +145,7 @@ public abstract class Entity {
 			}
 		}
 		this.path = new Path();
+		return false;
 	}
 
 	protected int[] moveable(int current, ArrayList<Integer> closed,
@@ -247,79 +259,100 @@ public abstract class Entity {
 	boolean set = false;
 
 	public void calculate_variables() {
-		if (ships == null) {
-			return;
-		}
-		if (ships.get_ship(ship) == null) {
-			return;
-		}
 		abs_pos = this.position.whole().add(last_position);
 	}
 
-	public void set_frame(Tile frame) {
-		this.frame_to_build = frame;
-	}
+	private boolean constructing = false;
+	private boolean call = false;
+	private Frame frame;
+	private int timer = -1;
+	private boolean adj_build = false;
+	private boolean inventory_setup = false;
+	private boolean build_selected = false;
+	private String recipe = "";
+	private Vertex2d construction_pos = new Vertex2d(0, 0, 0, 0);
 
-	protected void construct() {
-		Ship curr_ship = ships.get_ship(ship);
-		if (action_timer == 0) {
-			if (target_tile != -1) {
-				calculate_variables();
-
-				if (current_tile - 1 == target_tile
-						|| current_tile + 1 == target_tile
-						|| current_tile - ships.get_ship(ship).ship.mapwidth == target_tile
-						|| current_tile + ships.get_ship(ship).ship.mapwidth == target_tile) {
-
-					if (frame_to_build != null) {
-						action_timer = 1;
-
-						curr_ship.add_tile(frame_to_build);
-						frame_to_build = null;
-						return;
-					}
+	public void construct(Vertex2d pos, int ship) {
+		if(moving){
+			return;
+		}
+		// updated
+		if (ship != this.ship) {
+			return;// no intership construction
+		}
+		if(inventory_setup && !build_selected){
+			if(core.game.inventory.selected != null){
+				System.out.println("selected");
+				build_selected = true;
+				recipe = core.game.inventory.selected.get_name();
+				core.game.inventory.set_inventory(true);
+			}
+			else{
+				build_selected = false;
+			}
+		}
+		if (frame != null) {
+			if (frame.finished()) {
+				reset_construction();
+				return;
+			}
+		}
+		if (!constructing) {
+			if (!inventory_setup) {
+				construction_pos = pos.whole();
+				core.game.inventory.set_inventory(false);
+				core.game.inventory.clear_storage();
+				Construction[] recipes = core.game.construction
+						.check_recipes(items);
+				System.out.println(recipes.length + "recipe");
+				for (int i = 0; i < recipes.length; i++) {
+					Tile t = core.game.world.getnew(recipes[i].get_result());
+					t.init(core);
+					core.game.inventory.add_item(t, 1);
 				}
-				if (curr_ship.get_tile(target_tile) != null) {
-					calculate_variables();
-					if (current_tile - 1 == target_tile
-							|| current_tile + 1 == target_tile
-							|| current_tile - curr_ship.ship.mapwidth == target_tile
-							|| current_tile + curr_ship.ship.mapwidth == target_tile) {
-						Item[] required = curr_ship.get_tile(target_tile)
-								.get_required_resources();
-						int[] positions = new int[required.length];
+				core.game.inventory.selected = null;
+				inventory_setup = true;
+				call = true;
+			} else if (build_selected) {
 
-						int size = 0;
-						for (int i = 0; i < required.length; i++) {
-							for (int j = 0; j < items.size(); j++) {
-								positions[i] = -1;
-								if (items.get(j).get_name() == required[i]
-										.get_name()) {
-									positions[i] = j;
-									size += 1;
-								}
-							}
-						}
-						Item[] adding = new Item[size];
-						int pos = 0;
-						for (int i = 0; i < positions.length; i++) {
-							if (positions[i] != -1) {
-								adding[pos] = items.get(positions[i]);
-								pos += 1;
-							}
-						}
-						curr_ship.get_tile(target_tile).set_stored_resources(
-								adding);
-					}
-				} else if (frame_to_build == null) {
-					target_tile = -1;
+				constructing = true;
+				if (!core.game.construction.get_recipe(recipe).check(items)) {
+					reset_construction();
+					return;
+				}
+				if (next_to_loc(pos)) {
+
+				} else {
+					reset_construction();
+					return;
+				}
+			}
+		}
+		if (constructing) {
+			if (!adj_build) {
+				if (adjacent(ship, pos.whole().div(32))) {
+					adj_build = true;
+					timer = core.game.construction.setup_tick();
+					frame = new Frame(pos.whole().div(32), core,
+							core.game.universe.get_ship(ship).get_world());
+					frame.assign_construct(
+							core.game.construction.get_recipe(recipe), timer,
+							this);
+					ships.get_ship(ship).add_tile(frame);
 				}
 			}
 		}
 	}
+	public void reset_construction(){
+		constructing = false;
+		frame = null;
+		adj_build = false;
+		inventory_setup = false;
+		build_selected = false;
+		call = false;
+	}
 
 	public void tick() {
-
 		Ship curr_ship = ships.get_ship(ship);
 		if (action_timer != 0) {
 			action_timer++;
@@ -327,43 +360,63 @@ public abstract class Entity {
 				action_timer = 0;
 			}
 		}
-		this.construct();
-		
-		if(curr_ship == null){
-			Collision_package cp = ships.entity_collision_check(this);
-			if(cp.s != null){
-				curr_ship = cp.s;
-				Vertex2d tile = curr_ship.get_tile(cp.tile).get_pos().whole();	
-				current_tile = cp.tile;
-				tile.mult(32);
-				position = tile.whole();
-				
-				tile.add(curr_ship.correct_pos);
-				this.ship = curr_ship.get_ship_id();
-				//movement = tile.whole().sub(abs_pos);
-				
-				
-			}
-		}
-		else{
-			
-			current_tile = curr_ship.tile_at(position.whole().div(32));
-			
-			if(curr_ship.get_tile(current_tile) == null && !moving){
-				ship = -1;
-				
-			}
-			else{
-				last_position = curr_ship.correct_pos.whole();
-				calculate_variables();
-				
-			}
-			
-		}
-		
-		render_pos = abs_pos.whole().div(2);
-		
 
+		if (curr_ship == null) {
+			Collision_package cp = ships.entity_collision_check(this);
+
+			if (cp.s != null) {
+				curr_ship = cp.s;
+
+				if (curr_ship.get_tile(cp.tile) != null) {
+					Vertex2d tile = curr_ship.get_tile(cp.tile).get_pos()
+							.whole();
+					current_tile = cp.tile;
+					tile.mult(16);
+					position = tile.whole();
+					last_position = curr_ship.correct_pos.whole().div(2);
+					tile.add(curr_ship.correct_pos);
+				} else {
+					last_position = curr_ship.correct_pos.whole().add(position);
+					position = new Vertex2d(0, 0, 0, 0);
+				}
+				ship = curr_ship.get_ship_id();
+				// movement = tile.whole().sub(abs_pos);
+
+			}
+		} else {
+
+			current_tile = curr_ship.tile_at(position.whole().div(16));
+
+			if (curr_ship.get_tile(current_tile) == null && !moving) {
+				ship = -1;
+
+			} else {
+				last_position = curr_ship.correct_pos.whole().div(2);
+				calculate_variables();
+
+			}
+
+		}
+		//update inventory
+		if(selected){
+			core.game.inventory.load_items(items);
+		}
+		// construction , not very simple.
+		if (call) {
+			construct(construction_pos, ship);
+		}
+
+		// interaction , fairly simple
+		if (interacting) {
+			if (com.lcass.util.Util.adjacent(position, interaction)) {
+				Ship ship_curr = core.game.universe.get_ship(ship);
+				Tile t = ship_curr.get_tile(ship_curr.tile_at(interaction
+						.whole().div(16)));
+				t.interact(this);
+				interacting = false;
+			}
+		}
+		render_pos = abs_pos.whole().div(1);
 		if (movement.x != 0 || movement.y != 0) {
 			moving = true;
 		}
@@ -375,6 +428,7 @@ public abstract class Entity {
 
 			if (movement == null) {
 				if (path == null) {
+					path_move = false;
 					return;
 				}
 				Vertex2d temp_pos = path.next();
@@ -410,43 +464,39 @@ public abstract class Entity {
 				}
 			}
 			if (movement.x > 0) {
-				if(movement.x >= 1){
-				position.x += 1;
-				movement.x -= 1;
-				}
-				else{
+				if (movement.x >= 1) {
+					position.x += 1;
+					movement.x -= 1;
+				} else {
 					position.x += movement.x;
 					movement.x = 0;
 				}
 			} else {
 				if (movement.x == 0) {
 					xtrue = true;
-				} else if(movement.x <= -1){
+				} else if (movement.x <= -1) {
 					position.x -= 1;
 					movement.x += 1;
-				}
-				else{
+				} else {
 					position.x += movement.x;
 					movement.x = 0;
 				}
 			}
 			if (movement.y > 0) {
-				if(movement.y >= 1){
-				position.y += 1;
-				movement.y -= 1;
-				}
-				else{
+				if (movement.y >= 1) {
+					position.y += 1;
+					movement.y -= 1;
+				} else {
 					position.y += movement.y;
 					movement.y = 0;
 				}
 			} else {
 				if (movement.y == 0) {
 					ytrue = true;
-				} else if(movement.y <= -1){
+				} else if (movement.y <= -1) {
 					position.y -= 1;
 					movement.y += 1;
-				}
-				else{
+				} else {
 					position.y += movement.y;
 					movement.y = 0;
 				}
@@ -456,6 +506,10 @@ public abstract class Entity {
 				movement_stage = 0;
 			}
 			if (ytrue && xtrue && path_move) {
+				if (path == null) {
+					path_move = false;
+					return;
+				}
 				Vertex2d temp = path.next();
 				if (temp == null) {
 					moving = false;
@@ -463,6 +517,9 @@ public abstract class Entity {
 					movement_stage = 0;
 				} else {
 					movement = temp;
+					Vertex2d target_loc = position.whole().add(movement);
+					target_loc.div(16);
+					core.game.universe.get_ship(ship).bump(target_loc,this);
 				}
 			}
 		}
@@ -538,14 +595,175 @@ public abstract class Entity {
 	public int get_id() {
 		return id;
 	}
-	public void on_select(){
+
+	public void on_select() {
+
+	}
+
+	public void on_hit(Projectile p) {
+
+	}
+
+	public void on_splode(int power) {
+
+	}
+
+	public boolean try_loc(Vertex2d target) {
+		Vertex2d right = target.whole().add(new Vertex2d(32, 0, 0, 0));
+		Vertex2d left = target.whole().add(new Vertex2d(-32, 0, 0, 0));
+		Vertex2d up = target.whole().add(new Vertex2d(0, 32, 0, 0));
+		Vertex2d down = target.whole().add(new Vertex2d(0, -32, 0, 0));
+		if (move_to_loc(target)) {
+			return true;
+		}
+		if (move_to_loc(right)) {
+			return true;
+		}
+		if (move_to_loc(left)) {
+			return true;
+		}
+		if (move_to_loc(up)) {
+			return true;
+		}
+		if (move_to_loc(down)) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean next_to_loc(Vertex2d target) {
+		Vertex2d right = target.whole().add(new Vertex2d(32, 0, 0, 0));
+		Vertex2d left = target.whole().add(new Vertex2d(-32, 0, 0, 0));
+		Vertex2d up = target.whole().add(new Vertex2d(0, 32, 0, 0));
+		Vertex2d down = target.whole().add(new Vertex2d(0, -32, 0, 0));
+		if (move_to_loc(right)) {
+			return true;
+		}
+		if (move_to_loc(left)) {
+			return true;
+		}
+		if (move_to_loc(up)) {
+			return true;
+		}
+		if (move_to_loc(down)) {
+			return true;
+		}
+		return false;
+	}
+
+	public void interact(Vertex2d target) {
+		if (target == null) {
+			return;
+
+		}
+		Ship current = core.game.universe.get_ship(ship);
+		if (current == null) {
+			return;
+
+		}
+		if (current.get_tile(current.tile_at(target.whole().div(32))) == null) {
+			return;
+		}
+
+		else {
+			if (try_loc(target)) {
+				interaction = target.whole().div(2);
+				interacting = true;
+			}
+		}
+	}
+
+	public Item[] retreive_inventory() {
+		return items;
+	}
+
+	public void add_item(Item a) {
+
+		for (int i = 0; i < items.length; i++) {
+			if (items[i] != null) {
+				if (items[i].get_name() == a.get_name()) {
+					items[i].set_stack(items[i].get_stack() + a.get_stack());
+					return;
+				}
+			}
+		}
+		for (int i = 0; i < items.length; i++) {
+			if (items[i] == null) {
+				items[i] = a;
+
+				return;
+			}
+		}
+	}
+
+	public void remove_item(Item a) {
+		for (int i = 0; i < items.length; i++) {
+			if (items[i] != null) {
+				if (items[i].get_name() == a.get_name()) {
+					items[i].set_stack(items[i].get_stack() - a.get_stack());
+					if (items[i].get_stack() == 0) {
+						items[i] = null;
+					} else if (items[i].get_stack() < 0) {
+						System.out
+								.println("More of an item was removed from the inventory than there was availible");
+					}
+				}
+			}
+		}
+	}
+
+	public boolean adjacent(int ship_id, Vertex2d pos) {
+		if (ship != ship_id) {
+			return false;
+		}
+		int tile_pos = core.game.universe.get_ship(ship).tile_at(pos);
+		if (tile_pos == -1) {
+			return false;
+		}
+
+		Vertex2d tile = pos.whole();
+		Vertex2d left = position.whole().to_int()
+				.add(new Vertex2d(-16, 0, 0, 0));
+		Vertex2d right = position.whole().to_int()
+				.add(new Vertex2d(16, 0, 0, 0));
+		Vertex2d up = position.whole().to_int().add(new Vertex2d(0, 16, 0, 0));
+		Vertex2d down = position.whole().to_int()
+				.add(new Vertex2d(0, -16, 0, 0));
+		left.div(16);
+		right.div(16);
+		up.div(16);
+		down.div(16);
+		if (position.whole().div(16).to_int().equals(tile)) {
+			return true;
+		}
+		if (left.equals(tile)) {
+			return true;
+		}
+		if (right.equals(tile)) {
+			return true;
+		}
+		if (up.equals(tile)) {
+			return true;
+		}
+		if (down.equals(tile)) {
+			return true;
+		}
+		System.out.println("false");
+		return false;
+	}
+	public void unselect(){
+		core.game.inventory.set_weapon(true);
+	}
+	public void select(){//init and cleanup functions basically
+		core.game.inventory.set_inventory(true);
+		core.game.inventory.load_items(items);
+	}
+	public void right_mouse(Vertex2d loc){
 		
 	}
-	public void on_hit(Projectile p){
+	public void left_mouse(Vertex2d loc){
 		
 	}
-	public void on_splode(int power){
-		
-	}
+	
 
 }

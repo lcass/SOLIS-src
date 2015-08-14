@@ -67,6 +67,7 @@ public class CrewHandler {
 				Vertex2d rot = e.get_rotation();
 				if(rot.u != 0){
 					temp = com.lcass.util.Util.rotate(temp, rot, rot.u);
+					System.out.println(temp[0].x + " " + rot.x);
 				}
 				Progressive_buffer[] temp_prog = core.G.to_buffer(temp);
 				draw_data[0].extend(temp_prog[0]);
@@ -75,7 +76,8 @@ public class CrewHandler {
 					
 					Vertex2d[] tempselected = core.G.rectangle_vert((int)(e.get_render_pos().x) * 2,(int)(e.get_render_pos().y) * 2, DEFINES.ENTITY_WIDTH, DEFINES.ENTITY_HEIGHT,core.crew_sprite.getcoords(48, 0, 64, 16));
 					if(rot.u != 0){
-						temp = com.lcass.util.Util.rotate(tempselected, rot, rot.u);
+						temp = com.lcass.util.Util.rotate(tempselected, rot, 0);
+						
 					}
 					Progressive_buffer[] temp_selected = core.G.to_buffer(tempselected);
 					draw_data[0].extend(temp_selected[0]);
@@ -84,18 +86,18 @@ public class CrewHandler {
 				}
 			draw.edit_data(draw_data);
 		}
-		Vertex2d rotation = core.game.ships.get_cam_rotation();
+		Vertex2d rotation = core.game.universe.ships.get_cam_rotation();
 		draw.set_rot_pos(rotation);
-		draw.rotate(rotation.u);
+		draw.rotate(-rotation.u);
 		
 
 	}
 	public Entity get_crew(Vertex2d position,int owner){
 		for(int i = 0;i < entities.size();i++){
 			Entity a= entities.get(i);
-			Vertex2d pos = a.get_abs().whole().sub(core.game.ships.get_ship(owner).correct_pos);
-			pos.div(16);
-			System.out.println(pos.x);
+			Vertex2d pos = a.get_abs().whole();
+			pos.div(16).ceil();
+			System.out.println(pos.x + "pos");
 			if(pos.x == position.x && pos.y == position.y){
 				return entities.get(i);
 			}
@@ -105,7 +107,7 @@ public class CrewHandler {
 
 	public void render() {
 		
-		draw.set_position(core.game.ships.coreship.camera.whole().sub(core.game.ships.coreship.absolute_position));
+		draw.set_position(core.game.universe.ships.coreship.camera.whole().sub(core.game.universe.ships.coreship.absolute_position));
 		draw.render();
 	}
 

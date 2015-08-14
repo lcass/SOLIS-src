@@ -104,6 +104,19 @@ public class GUI {
 		updated = true;
 		
 	}
+	public void bind_button(Vertex2d position, boolean textured,
+			Encapsulated_method function,String text) {
+		if (textured) {
+			buttons.add(new Button(new Vertex2d(position.x, position.y,
+					position.x + 128, position.y + 26), textured, this,
+					function,text));
+		} else {
+			buttons.add(new Button(new Vertex2d(position.x, position.y,
+					position.x + position.u, position.y  +position.v), textured, this, function));
+		}
+		updated = true;
+		
+	}
 
 	public void update() {
 		updated = true;
@@ -123,6 +136,14 @@ public class GUI {
 		textdata.edit_data(text_data);
 		return stored;
 	}
+	public int draw_text_screen(Vertex2d position , String text , int fontsize){
+		Progressive_buffer[] texttemp = tg.generate_text(text,position, fontsize);
+		int stored = text_data[0].get_limit();
+		text_data[0].extend(texttemp[0]);
+		text_data[1].extend(texttemp[1]);
+		textdata.edit_data(text_data);
+		return stored;
+	}
 	public void set_instance(Object a){
 		for(int i = 0;i < buttons.size();i++){
 			buttons.get(i).set_instance(a);
@@ -132,5 +153,18 @@ public class GUI {
 		ac_translate = translate.whole();
 		this.translate = core.G.convert_coordinates(ac_translate).sub(new Vertex2d(0,2,0,0));
 		
+	}
+	public boolean on_gui(Vertex2d mouse){
+		
+		Vertex2d correct_pos = ac_translate.whole().add(new Vertex2d(position.x,position.y,position.u + ac_translate.x,-position.v + ac_translate.y));
+		if(mouse.x >= correct_pos.x && mouse.x <= correct_pos.u){
+			if(mouse.y <= correct_pos.y && mouse.y >= correct_pos.v){
+				return true;
+			}
+		}
+		return false;
+	}
+	public Vertex2d get_position(){
+		return position.whole();
 	}
 }

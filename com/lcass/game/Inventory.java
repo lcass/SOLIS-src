@@ -1,5 +1,6 @@
 package com.lcass.game;
 
+import com.lcass.game.Items.Item;
 import com.lcass.game.tiles.Tile;
 import com.lcass.graphics.VBO;
 import com.lcass.graphics.Vertex2d;
@@ -7,14 +8,19 @@ import com.lcass.graphics.texture.spritesheet;
 import com.lcass.util.Progressive_buffer;
 
 public class Inventory {
-	private slot[] storage;
+	public slot[] storage;
 	public weaponset[] wep_storage;
 	public Tile selected;
+	public Item[] stored_items;// dynamic
+	public Item selected_item;
 	private Game game;
 	private Progressive_buffer[] data = new Progressive_buffer[2];
-	private VBO drawdata, selecteddata, selectedtiledata;
-	private boolean hastile = false;
+	private VBO drawdata, item_drawdata, selecteddata, selectedtiledata,
+			selecteditemdata;
+	private boolean hastile = false, hasitem = false;
+	private Vertex2d render_position = new Vertex2d(0, 0, 0, 0);
 	private boolean weapon = false;
+	private boolean item = false;
 	private int position;
 	private int lastselected = 0, selectedposition = 4;// 0 dock 1 block info 2
 														// person info 3 delete
@@ -25,12 +31,16 @@ public class Inventory {
 	public Inventory(int size, Game game) {
 		this.game = game;
 		storage = new slot[size];
+
 		data[0] = new Progressive_buffer(null, false);
 		data[1] = new Progressive_buffer(null, true);
 		selectedsprite = new spritesheet("textures/selected.png");
 		drawdata = new VBO(game.core.G.mainvbo);
 		drawdata.create(size * 12);
 		drawdata.bind_texture(game.core.tile_sprite.gettexture());
+		item_drawdata = new VBO(game.core.G.mainvbo);
+		item_drawdata.create(size * 12);
+		item_drawdata.bind_texture(game.core.item_sprite.gettexture());
 		selecteddata = new VBO(game.core.G.mainvbo);
 		selecteddata.create(game.core.G.square(
 				(int) (game.core.width - (45 * 2)),
@@ -41,6 +51,9 @@ public class Inventory {
 		selectedtiledata = new VBO(game.core.G.mainvbo);
 		selectedtiledata.bind_texture(game.core.tile_sprite.gettexture());
 		selectedtiledata.create(12);
+		selecteditemdata = new VBO(game.core.G.mainvbo);
+		selecteditemdata.bind_texture(game.core.item_sprite.gettexture());
+		selecteditemdata.create(12);
 		wep_storage = new weaponset[size];
 		for (int i = 0; i < wep_storage.length; i++) {
 			wep_storage[i] = new weaponset(null, 50);
@@ -48,12 +61,53 @@ public class Inventory {
 	}
 
 	public void render() {
-		drawdata.render();
+		if (!item) {
+			drawdata.render();
+		} else {
+			item_drawdata.render();
+		}
 		selecteddata.render();
-		if (hastile) {
+		if (hastile && !item) {
 			selectedtiledata.render();
 
 		}
+		if (hasitem && item) {
+			selecteditemdata.render();
+
+		}
+	}
+
+	public void load_items(Item[] items) {
+		int total_length = 0;
+		int[] locations = new int[items.length];
+		for (int i = 0; i < locations.length; i++) {
+			locations[i] = -1;
+		}
+		for (int i = 0; i < items.length; i++) {
+			if (items[i] != null) {
+				locations[total_length] = i;
+				total_length++;
+
+			}
+		}
+		stored_items = new Item[total_length];
+		for (int i = 0; i < locations.length; i++) {
+			if (locations[i] == -1) {
+				break;
+			} else {
+				stored_items[i] = items[locations[i]];
+			}
+		}
+		force_update();
+	}
+
+	public void set_render_position(Vertex2d render_pos) {
+		this.render_position = game.core.G.convert_coordinates(render_pos);
+		drawdata.set_position(render_position);
+		item_drawdata.set_position(render_position);
+		selecteddata.set_position(render_position);
+		selectedtiledata.set_position(render_position);
+		selecteditemdata.set_position(render_position);
 	}
 
 	public void set_selectedposition(int i) {
@@ -63,11 +117,12 @@ public class Inventory {
 	public int get_lastselected() {
 		return lastselected;
 	}
-	public int get_selected_wep(){
-		if(weapon){
-			for(int i = 0; i < wep_storage.length;i++){
-				if(wep_storage[i].type != null){
-					if(wep_storage[i].type.get_name()==selected.get_name()){
+
+	public int get_selected_wep() {
+		if (weapon) {
+			for (int i = 0; i < wep_storage.length; i++) {
+				if (wep_storage[i].type != null) {
+					if (wep_storage[i].type.get_name() == selected.get_name()) {
 						return i;
 					}
 				}
@@ -87,37 +142,71 @@ public class Inventory {
 			data[1].clear();
 			Progressive_buffer[] temp = new Progressive_buffer[2];
 			if (!weapon) {
-				for (int i = 0; i < 15; i++) {
-					if (i + position < storage.length) {
+				if (item) {
+					for (int i = 0; i < stored_items.length; i++) {
+						Vertex2d spritepos = new Vertex2d(0, 0, 0, 0);
+						if (stored_items[i] != null) {
+							spritepos = stored_items[i].get_sprite();
 
-						if (storage[i + position] != null) {
-
-							Vertex2d spritepos = storage[i + position].stored
-									.getsprite();
-							temp = game.core.G
-									// just dont mess with these values , they
-									// work leave them...
-									.rectangle(
-											game.core.width - 40,
-											game.core.height - 48 - (i * 38),
-											game.world.obwidth,
-											game.world.obheight,
-											game.core.tile_sprite
-													.getcoords(
-															(int) spritepos.x,
-															(int) spritepos.y,
-															(int) spritepos.x
-																	+ game.world.texwidth,
-															(int) spritepos.y
-																	+ game.world.texheight));
-							data[0].extend(temp[0]);
-							data[1].extend(temp[1]);
+						} else {
+							continue;
 						}
-					} else {
-						break;
+
+						temp = game.core.G
+						// just dont mess with these values ,
+						// they
+						// work leave them...
+								.rectangle(game.core.width - 40,
+										game.core.height - 48 - (i * 38),
+										game.world.obwidth,
+										game.world.obheight,
+										game.core.tile_sprite.getcoords(
+												(int) spritepos.x,
+												(int) spritepos.y,
+												(int) spritepos.x + 8,
+												(int) spritepos.y + 8));
+						data[0].extend(temp[0]);
+						data[1].extend(temp[1]);
+					}
+				} else {
+					for (int i = 0; i < storage.length; i++) {
+						if (storage[i + position] != null) {
+							Vertex2d spritepos = new Vertex2d(0, 0, 0, 0);
+							if (!item) {
+								if (storage[i + position].stored != null) {
+									spritepos = storage[i + position].stored
+											.getsprite();
+								} else {
+
+								}
+
+								temp = game.core.G
+										// just dont mess with these values
+										// ,
+										// they
+										// work leave them...
+										.rectangle(
+												game.core.width - 40,
+												game.core.height - 48
+														- (i * 38),
+												game.world.obwidth,
+												game.world.obheight,
+												game.core.tile_sprite
+														.getcoords(
+																(int) spritepos.x,
+																(int) spritepos.y,
+																(int) spritepos.x
+																		+ game.world.texwidth,
+																(int) spritepos.y
+																		+ game.world.texheight));
+								data[0].extend(temp[0]);
+								data[1].extend(temp[1]);
+							}
+						}
 					}
 				}
-				if (selected != null) {
+
+				if (selected != null && !item) {
 
 					selectedtiledata
 							.edit_data(game.core.G.rectangle(
@@ -133,6 +222,20 @@ public class Inventory {
 					hastile = true;
 
 				}
+				if (selected_item != null && item) {
+
+					selecteditemdata.edit_data(game.core.G.rectangle(
+							game.core.width - 90, game.core.height - 48,
+							game.world.obwidth, game.world.obheight,
+							game.core.tile_sprite.getcoords(
+									(int) selected_item.get_sprite().x,
+									(int) selected_item.get_sprite().y,
+									(int) (selected_item.get_sprite().u / 4),
+									(int) (selected_item.get_sprite().v / 4))));
+					hasitem = true;
+
+				}
+
 			} else {
 				for (int i = 0; i < 15; i++) {
 					if (i + position < wep_storage.length) {
@@ -181,12 +284,16 @@ public class Inventory {
 
 				}
 			}
-			temp = game.core.G.square(0, 0, game.world.obwidth,
+			temp = game.core.G.square(0, 0, 0,
 					game.core.tile_sprite.getcoords(0, 0, 0, 0));
 			data[0].extend(temp[0]);
 			data[1].extend(temp[1]);
 			drawdata.clear_data();
-			drawdata.edit_data(data);
+			if (!item) {
+				drawdata.edit_data(data);
+			} else {
+				item_drawdata.edit_data(data);
+			}
 		}
 	}
 
@@ -219,15 +326,22 @@ public class Inventory {
 
 	public boolean take_selected(int size) {
 		dataupdate = true;
-		if (selected != null) {
+		if (selected != null && !item) {
 			if (take_item(selected, size)) {
 				return true;
 			} else {
 				return false;
 			}
+
+		} else if (selected_item != null && item) {
+			if (take_item(selected, size)) {
+				return true;
+			}
+
 		} else {
 			return false;
 		}
+		return false;
 	}
 
 	public boolean take_item(Tile t, int size) {
@@ -289,200 +403,99 @@ public class Inventory {
 		}
 	}
 
-	public void click1() {
-		if (!weapon) {
-			if (storage[position] != null) {
-				selected = storage[position].stored;
-				dataupdate = true;
+	public void update_selected() {
+		if (weapon) {
+			if (wep_storage[selected_slot] != null) {
+				selected = wep_storage[selected_slot].type;
+			}
+		} else if (item) {
+			if (storage[selected_slot] != null) {
+
+				selected_item = stored_items[selected_slot];
 			}
 		} else {
-			selected = wep_storage[position].type;
-			dataupdate = true;
+			if (storage[selected_slot] != null) {
+				selected = storage[selected_slot].stored;
+			}
 		}
+		force_update();
+	}
 
+	private int selected_slot = 0;
+
+	public void click1() {
+		selected_slot = position;
+		update_selected();
 	}
 
 	public void click2() {
-		if (!weapon) {
-
-			if (storage[position + 1] != null) {
-				selected = storage[position + 1].stored;
-
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 1].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 1;
+		update_selected();
 	}
 
 	public void click3() {
-		if (!weapon) {
-			if (storage[position + 2] != null) {
-				selected = storage[position + 2].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 2].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 2;
+		update_selected();
 	}
 
 	public void click4() {
-		if (!weapon) {
-			if (storage[position + 3] != null) {
-				selected = storage[position + 3].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 3].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 3;
+		update_selected();
 	}
 
 	public void click5() {
-		if (!weapon) {
-			if (storage[position + 4] != null) {
-				selected = storage[position + 4].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 4].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 4;
+		update_selected();
 	}
 
 	public void click6() {
-		if (!weapon) {
-			if (storage[position + 5] != null) {
-				selected = storage[position + 5].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 5].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 5;
+		update_selected();
 	}
 
 	public void click7() {
-		if (!weapon) {
-			if (storage[position + 6] != null) {
-				selected = storage[position + 6].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 6].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 6;
+		update_selected();
 	}
 
 	public void click8() {
-		if (!weapon) {
-			if (storage[position + 7] != null) {
-				selected = storage[position + 7].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 7].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 7;
+		update_selected();
 	}
 
 	public void click9() {
-		if (!weapon) {
-			if (storage[position + 8] != null) {
-				selected = storage[position + 8].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 8].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 8;
+		update_selected();
 	}
 
 	public void click10() {
-		if (!weapon) {
-			if (storage[position + 9] != null) {
-				selected = storage[position + 9].stored;
-				dataupdate = true;
-			}
-		}else{
-			selected = wep_storage[position + 9].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 9;
+		update_selected();
 	}
 
 	public void click11() {
-		if (!weapon) {
-			if (storage[position + 10] != null) {
-				selected = storage[position + 10].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 10].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 10;
+		update_selected();
 	}
 
 	public void click12() {
-		if (!weapon) {
-			if (storage[position + 11] != null) {
-				selected = storage[position + 11].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 11].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 11;
+		update_selected();
 	}
 
 	public void click13() {
-		if (!weapon) {
-			if (storage[position + 12] != null) {
-				selected = storage[position + 12].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 12].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 12;
+		update_selected();
 	}
 
 	public void click14() {
-		if (!weapon) {
-			if (storage[position + 13] != null) {
-				selected = storage[position + 13].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 13].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 13;
+		update_selected();
 	}
 
 	public void click15() {
-		if (!weapon) {
-			if (storage[position + 14] != null) {
-				selected = storage[position + 14].stored;
-				dataupdate = true;
-			}
-		}
-		else{
-			selected = wep_storage[position + 14].type;
-			dataupdate = true;
-		}
+		selected_slot = position + 14;
+		update_selected();
 	}
 
 	public int get_selectedposition() {
@@ -530,7 +543,22 @@ public class Inventory {
 
 	public void set_weapon(boolean wep) {
 		this.weapon = wep;
+		item = false;
+		selected = null;
+		selected_item = null;
 		dataupdate = true;
+	}
+
+	public void set_inventory(boolean invent) {
+		weapon = false;
+		item = invent;
+		selected = null;
+		selected_item = null;
+	}
+
+	public void clear_storage() {
+		int storage_size = storage.length;
+		storage = new slot[storage_size];
 	}
 
 }
